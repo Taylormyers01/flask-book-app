@@ -1,0 +1,5 @@
+flask
+bootstrap-flask
+flask-cors
+Flask-SQLAlchemy
+Flask-Login

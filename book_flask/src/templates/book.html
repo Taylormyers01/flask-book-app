@@ -1,0 +1,8 @@
+<!doctype html>
+{% extends "layout.html" %}
+    {% block content %}
+        <title>Book Testing!</title>
+        {% for v_book in books %}
+            {% include "book-view.html" %}
+        {% endfor %}
+{% endblock %}

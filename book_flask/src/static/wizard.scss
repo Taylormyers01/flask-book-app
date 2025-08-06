@@ -1,0 +1,15 @@
+
+// 1. Define your custom color variables
+$primary: #6A3190;
+$secondary: #D2DAE0;
+$success: #FBC200;
+$dark: #440A5F;
+$light:#E9EDF3;
+$info: #D2DAE0;
+
+// You can also define new colors or adjust existing ones
+// $my-custom-color: #ffcc00;
+
+// 2. Import Bootstrap's SCSS files *after* your variable overrides
+// Ensure your path to Bootstrap's SCSS is correct based on your project setup
+@import "bootstrap/scss/bootstrap";
