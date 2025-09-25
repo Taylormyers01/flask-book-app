@@ -1,0 +1,141 @@
+<!-- Book Modal -->
+<div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" id="bookTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="settings-tab" data-bs-toggle="tab"
+                                data-bs-target="#settings" type="button" role="tab"
+                                aria-controls="settings" aria-selected="true">
+                            Book Settings
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extra-tab" data-bs-toggle="tab"
+                                data-bs-target="#extra" type="button" role="tab"
+                                aria-controls="extra" aria-selected="false">
+                            Extra Book Info
+                        </button>
+                    </li>
+                </ul>
+
+
+                <div class="row">
+                    <div class="col-4 ml-0 mb-0">
+                        <img id="bookThumnail" src="{{ url_for('static', filename='images/empty_cover.png') }}" class="card-img-top" style="height: 400px" alt="no-thumnail">
+                    </div>
+                    <div class="col-8">
+                        <div class="tab-content mt-3" id="bookTabContent">
+                            <!-- Settings Tab -->
+                            <div class="tab-pane fade show active" id="settings" role="tabpanel"
+                                 aria-labelledby="settings-tab">
+{#                            {{ url_for('book.update_book', next=next) }}#}
+                                <form method="dialog" id="bookForm">
+                                    <input type="hidden" name="g_id" id="hiddenGid" value="">
+                                    <!-- Title & Author (read-only) -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Title</label>
+                                        <input id="titleInput" type="text" class="form-control" value="" disabled readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Author</label>
+                                        <input id="authorInput" type="text" class="form-control" value="" disabled readonly>
+                                    </div>
+
+                                    <!-- Status Dropdown -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Status</label>
+                                        <select class="form-select" name="status" id="statusInput">
+                                            {% for status in BookStatus %}
+                                                <option value="{{ status.name }}">
+                                                    {{ status.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <!-- Owned Checkbox -->
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="owned" id="ownedCheckbox"
+                                               value="false"
+                                        >
+                                        <label class="form-check-label" for="ownedCheckbox">
+                                            Owned
+                                        </label>
+                                    </div>
+{#                                    {%  if current_user.is_authenticated==false %} disabled {% endif %}#}
+                                    <button onclick="update_book();" class="btn btn-primary">Save</button>
+                                </form>
+                            </div>
+
+                            <!-- Extra Info Tab -->
+                            <div class="tab-pane fade" id="extra" role="tabpanel"
+                                 aria-labelledby="extra-tab">
+                                <div class="mt-3 overflow-auto" style="max-height: 400px">
+                                    <strong>Description:</strong><p id="descriptionInput"></p>
+                                    <strong>Page Count:</strong><p id="pageCountInput"></p>
+                                    <strong>Published:</strong><p id="publishedInput"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const bookModal = document.getElementById('bookModal');
+
+        bookModal.addEventListener('show.bs.modal', event => {
+            const card = event.relatedTarget; // The card that triggered the modal
+            // Extract book data from card dataset
+            const data = card.getAttribute('data-book');
+            const book_data = JSON.parse(data)
+            // Populate modal
+            document.getElementById('bookTitle').textContent = book_data.title;
+            document.getElementById('hiddenGid').value = book_data.g_id;
+            document.getElementById('titleInput').value = book_data.title;
+            document.getElementById('authorInput').value = book_data.author;
+            document.getElementById('statusInput').value = book_data.status;
+
+            if (book_data.owned){
+                document.getElementById('ownedCheckbox').value = true
+                document.getElementById('ownedCheckbox').checked = true
+            }
+            document.getElementById('bookThumnail').src = book_data.thumbnail;
+            document.getElementById('descriptionInput').textContent = book_data.description;
+            document.getElementById('pageCountInput').textContent = book_data.page_count;
+            document.getElementById('publishedInput').textContent = book_data.publish_date;
+        });
+    });
+
+    function update_book(){
+        console.log('Updating book')
+        const bookForm = document.getElementById('bookForm');
+        let formData = new FormData(bookForm);
+        fetch('/update-book', {
+            method: "POST",
+            {#body: formData#}
+            body: formData
+        }).then(response =>{
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            const bookModal = document.getElementById('bookModal');
+            const modalInstance = bootstrap.Modal.getInstance(bookModal);
+            modalInstance.toggle()
+            window.location.reload()
+            return response.json();
+        });
+    }
+</script>

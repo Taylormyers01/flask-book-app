@@ -1,0 +1,108 @@
+<!-- Book Modal -->
+<div class="modal fade" id="bookModal-{{ v_book.g_id }}" tabindex="-1" aria-labelledby="bookModalLabel-{{ v_book.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookModalLabel-{{ v_book.g_id }}">{{ v_book.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" id="bookTab-{{ v_book.g_id }}" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="settings-tab-{{ v_book.g_id }}" data-bs-toggle="tab"
+                                data-bs-target="#settings-{{ v_book.g_id }}" type="button" role="tab"
+                                aria-controls="settings-{{ v_book.g_id }}" aria-selected="true">
+                            Book Settings
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extra-tab-{{ v_book.g_id }}" data-bs-toggle="tab"
+                                data-bs-target="#extra-{{ v_book.g_id }}" type="button" role="tab"
+                                aria-controls="extra-{{ v_book.g_id }}" aria-selected="false">
+                            Extra Book Info
+                        </button>
+                    </li>
+                </ul>
+
+
+                <div class="row">
+                    <div class="col-4">
+                        {% if v_book.thumbnail != None %}
+                            <img src="{{ v_book.thumbnail}}" class="card-img-top" style="height: 400px" alt="...">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/empty_cover.png') }}" class="card-img-top" style="max-height: 12rem;" alt="no-thumnail">
+                        {% endif %}
+                    </div>
+                    <div class="col-8">
+                        <div class="tab-content mt-3" id="bookTabContent-{{ v_book.g_id }}">
+                            <!-- Settings Tab -->
+                            <div class="tab-pane fade show active" id="settings-{{ v_book.g_id }}" role="tabpanel"
+                                 aria-labelledby="settings-tab-{{ v_book.g_id }}">
+                                <form method="POST" action="{{ url_for('book.update_book', v_book=v_book.g_id, next=next) }}">
+                                    {#                            {{ form.hidden_tag() }}#}
+
+                                    <!-- Title & Author (read-only) -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" class="form-control" value="{{ v_book.title }}" disabled readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Author</label>
+                                        <input type="text" class="form-control" value="{{ v_book.author }}" disabled readonly>
+                                    </div>
+
+                                    <!-- Status Dropdown -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Status</label>
+                                        <select class="form-select" name="status">
+                                            {% for status in BookStatus %}
+                                                <option value="{{ status.name }}"
+                                                        {% if v_book.status == status %}selected{% endif %}>
+                                                    {{ status.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <!-- Owned Checkbox -->
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="owned" id="owned-{{ v_book.g_id }}"
+                                               value="true" {% if v_book.owned %}checked{% endif %}>
+                                        <label class="form-check-label" for="owned-{{ v_book.g_id }}">
+                                            Owned
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" {%  if current_user.is_authenticated==false %} disabled {% endif %} >Save</button>
+                                </form>
+                            </div>
+
+                            <!-- Extra Info Tab -->
+                            <div class="tab-pane fade" id="extra-{{ v_book.g_id }}" role="tabpanel"
+                                 aria-labelledby="extra-tab-{{ v_book.g_id }}">
+                                <div class="mt-3 overflow-auto" style="max-height: 400px">
+                                    {% if v_book.description %}
+                                        <p><strong>Description:</strong> {{ v_book.description }}</p>
+                                    {% endif %}
+                                    {% if v_book.page_count %}
+                                        <p><strong>Page Count:</strong> {{ v_book.page_count }}</p>
+                                    {% endif %}
+                                    {% if v_book.published_date %}
+                                        <p><strong>Published:</strong> {{ v_book.published_date }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{#            <div class="modal-footer">#}
+{#                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>#}
+{#            </div>#}
+        </div>
+    </div>
+</div>

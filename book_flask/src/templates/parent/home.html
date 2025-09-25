@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block title %}Book Flask | Home{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+
+        <!-- Hero Section -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">📚 Welcome to Book Flask</h1>
+            <p class="lead">Track your personal library, organize your books, and rediscover your collection.</p>
+            <a href="" class="btn btn-secondary btn-lg mt-3">➕ Add a Book</a>
+{#            {{ url_for('add_book') }}#}
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row text-center mb-5">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body">
+                        <h2 class="fw-bold">{{ total_books }}</h2>
+                        <p class="text-muted">Books in Library</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body">
+                        <h2 class="fw-bold">{{ authors|length }}</h2>
+                        <p class="text-muted">Unique Authors</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body">
+                        <h2 class="fw-bold">{{ read_books | length}}</h2>
+                        <p class="text-muted">Read Books</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Featured Books -->
+        <h2 class="text-center mb-4">📖 Recently Added</h2>
+        <div class="row">
+            {% for book in recent_books %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 shadow-sm border-0"
+                         data-book="{{ book.to_json() }}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>
+                            <p class="card-text small text-muted">{{ book.genre }}</p>
+                            <a href="" class="btn btn-outline-secondary mt-auto" data-bs-target="#bookModal">View</a>
+{#                            {{ url_for('book_detail', book_id=book.id) }}#}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-muted">No books yet. Start by adding your first one!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-5">
+            <p class="lead">✨ Ready to grow your library?</p>
+            <a href="" class="btn btn-success btn-lg">Start Adding Books</a>
+{#            {{ url_for('add_book') }}#}
+        </div>
+    {% include 'content/book-modal.html' %}
+
+    </div>
+{% endblock %}

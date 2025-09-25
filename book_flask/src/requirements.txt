@@ -1,5 +1,6 @@
 flask
 bootstrap-flask
+jinja2-fragments
 flask-cors
 Flask-SQLAlchemy
 Flask-Login

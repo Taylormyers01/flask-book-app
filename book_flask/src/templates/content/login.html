@@ -1,0 +1,26 @@
+<!doctype html>
+<div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+  aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginModalLabel">Login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <input type="text" name="username" placeholder="Username" required>
+          <input type="password" name="password" placeholder="Password" required>
+          <button type="submit">Login</button>
+        </form>
+      <a href="{{ url_for('auth.register') }}">Create User</a>
+      </div>
+    </div>
+  </div>
+</div>
+{#<script>#}
+{#    document.addEventListener('DOMContentLoaded', function() {#}
+{#        var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {});#}
+{#        myModal.show();#}
+{#    });#}
+{#</script>#}

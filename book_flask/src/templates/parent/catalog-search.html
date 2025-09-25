@@ -1,0 +1,33 @@
+<!doctype html>
+{% extends "layout.html" %}
+    {% block content %}
+        <div class="container-fluid" style="height: 100%">
+            <div class="row justify-content-start input-group mt-2">
+                <div class="col-4">
+                    <input type="search" id="search-box" name="q" class="form-control" placeholder="Search...">
+                </div>
+                <div class="col-4">
+                    <button class="btn btn-secondary" type="submit" id="search-btn">Search</button>
+                </div>
+            </div>
+            <div class="list-group bg-light overflow-auto mt-2" style="height: 86vh" id="results">
+               {% include 'layout/book-grid-modal.html' %}
+            </div>
+        </div>
+
+        <script>
+            document.getElementById("search-btn").addEventListener("click", function() {
+                let query = document.getElementById("search-box").value;
+                fetch(`/update-catalog?q=${encodeURIComponent(query)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById("results").innerHTML = html;
+                    });
+            });
+
+            // optional: live search as you type
+            document.getElementById("search-box").addEventListener("keyup", function(e) {
+                if (e.key === "Enter") document.getElementById("search-btn").click();
+            });
+        </script>
+{% endblock %}

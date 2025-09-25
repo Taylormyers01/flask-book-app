@@ -3,64 +3,95 @@
 
 <head>
     {% block head %}
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Book-Flask</title>
-    {% block styles %}
-    <!-- Bootstrap CSS -->
-        {{ bootstrap.load_css() }}
-        <link rel="stylesheet" href="{{url_for('static', filename='wizard.scss')}}">
-    {% endblock %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Book-Flask</title>
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+            <!-- jQuery + jQuery UI (from CDN) -->
+            <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+        {% endblock %}
     {% endblock %}
 </head>
-
-<body class="color gray-900">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('home') }}">Book-Flask</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+<body class="color" style="background:lightgrey">
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light" style="height: 6%">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('home') }}">Book-Flask</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Home</a></li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Dropdown
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{url_for('hello')}}">Hello</a></li>
-                            <li><a class="dropdown-item" href="{{url_for('book')}}">Book</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                    </li>
-                </ul>
-                <!-- <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form> -->
-            </div>
-        </div>
-    </nav>
-    <div class="container-lg">
-        {% block content %}{% endblock %}
-    </div>
-    {% block scripts %}
-    <!-- Optional JavaScript -->
-    {{ bootstrap.load_js() }}
-    {% endblock %}
-</body>
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link active" aria-current="page"
+                                        href="{{ url_for('home') }}">Home</a></li>
+{#                <li class="nav-item"><a class="nav-link active" aria-current="page"#}
+{#                                        href="{{ url_for('test.get_test_drop') }}">Test Drag and Drop</a></li>#}
+{#                <li class="nav-item"><a class="nav-link active" aria-current="page"#}
+{#                                        href="{{ url_for('test.get_test_card') }}">Test Card</a></li>#}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        The Archives
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item {% if current_user.is_authenticated == false %}disabled{% endif %}"
+                               href="{{ url_for('book.my_archives') }}">My Archives</a></li>
+                        <li><a class="dropdown-item {% if current_user.is_authenticated == false %}disabled{% endif %}"
+                               href="{{ url_for('book.my_shelf') }}">My Shelf</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="{{ url_for('book.search_catalog') }}">Search the Catalogs</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                <li class="align-self-end">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                       id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ current_user.avatar_url or url_for('static', filename='default-avatar.png') }}"
+                             alt="avatar" width="32" height="32" class="rounded-circle me-2">
+                        {{ current_user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+{#                        <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>#}
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
+                        </li>
+                    </ul>
+                </li>
+                {% else %}
+                <!-- Login Link -->
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#loginModal" href="{{ url_for('auth.login') }}">Login</a>
+                </li>
+                {% endif %}
+            </ul>
+            <!-- <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form> -->
 
+        </div>
+    </div>
+</nav>
+<div class="container-lg" style="background: white; padding-top: 3rem;">
+    {% block content %}{% endblock %}
+</div>
+{% include 'content/login.html' %}
+{% block scripts %}
+    <!-- jQuery must come before jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <!-- Bootstrap’s JS (from bootstrap-flask) -->
+    {{ bootstrap.load_js() }}
+{% endblock %}
+</body>
 </html>

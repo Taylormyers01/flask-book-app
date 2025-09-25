@@ -1,0 +1,8 @@
+<div class="row gap-2">
+    {% if books is none %}
+        <h1>No books found</h1>
+    {% endif %}
+    {% for v_book in books %}
+        {% include "content/book-card.html" %}
+    {% endfor %}
+</div>

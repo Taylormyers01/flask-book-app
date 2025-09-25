@@ -1,0 +1,18 @@
+<!-- Book Card -->
+    <div class="card p-0 m-1 overflow-hidden" style="max-width: 12rem; max-height: 20rem"
+         data-bs-toggle="modal"
+         data-bs-target="#bookModal"
+         data-book="{{ v_book.to_json() }}">
+        {% if v_book.thumbnail != None %}
+            <img src="{{ v_book.thumbnail}}" class="card-img-top" style="height: 12rem; width: 12rem" alt="...">
+        {% else %}
+            <img src="{{ url_for('static', filename='images/empty_cover.png') }}" class="card-img-top" style="max-height: 12rem;" alt="no-thumnail">
+        {% endif %}
+        <div class="card-body mb-0 overflow-hidden">
+            <h5 class="card-title">
+                {{v_book.title}}
+            </h5>
+{#            <div class="card-subtitle text-sm text-muted"></div>#}
+        </div>
+        <div class="card-footer" style="max-height: 2rem">{{ v_book.author }}</div>
+    </div>

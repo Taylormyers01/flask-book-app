@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        .draggable {
+            cursor: move;
+            background-color: darkslategrey;
+            z-index: 1;
+        }
+
+        .droppable {
+            background-color: gray;
+        }
+
+        .book {
+            color: white;
+            border-radius: 0.25rem;
+            z-index: 1;
+        }
+        .book-vertical {
+            text-align: center;
+            writing-mode: vertical-rl;
+            width: 50px;
+            height: 150px;
+        }
+        .book-title {
+            font-weight: bold;
+            font-size: .8rem;
+        }
+        .book-author {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        .book-bordered {
+            border: 2px solid lightgrey; /* blue border */
+            padding: 0.25rem;
+        }
+        .book-horizontal {
+            text-align: center;
+            width: 150px;
+            height: 50px;
+        }
+
+        .shelf {
+            background-color: #deb887;
+            padding: 0.5rem 0 0.5rem 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .scrollhidden{
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .scrollhidden::-webkit-scrollbar{
+            display: none;
+        }
+        .highlight {
+            border: 2px dashed yellow;
+            background-color: rgba(255,255,0,0.2);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="board" style="min-height: 600px; position: relative;">
+        <div class="row">
+            <div class="col-8 overflow-y-auto scrollhidden m-0" style="z-index: 1; max-height: 90vh">
+    {#            {% for i in range(0, 240, 12) %}#}
+                    <div id="shelf" class="row shelf gap-2">
+                        {% for x in range(100) %}
+                            <div id="{{ x }}-drop"
+                                 data-position = "{{ x }}"
+                                 class="
+                                 droppable
+                                 book
+                                 book-vertical
+                                 test-2
+                                 position-relative
+                                 "></div>
+                        {% endfor %}
+                    </div>
+
+            </div>
+            <div class="col-3 d-flex flex-column" style="max-height: 90vh;">
+{#                <div class="collapse mt-3" id="bookView">#}
+{#                    <div class="card card-body">#}
+{#                        <h5 id="bookTitle"></h5>#}
+{#                        <p class="text-muted" id="bookAuthor"></p>#}
+{#                        <img id="bookImg" src="" class="img-fluid rounded" style="max-height: 150px; max-width: 50px" alt="Book cover">#}
+{#                        <p id="bookDesc"></p>#}
+{#                    </div>#}
+{##}
+{#                </div>#}
+                <div class="collapse" id="bookView">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+
+                                <!-- Thumbnail -->
+                                <img id="bookImg" src=""
+                                     class="rounded me-3"
+                                     style="width: 80px; height: auto;"
+                                     alt="Book cover">
+
+                                <!-- Book text info -->
+                                <div class="flex-grow-1">
+                                    <h5 id="bookTitle" class=" fw-bold"></h5>
+                                    <p id="bookAuthor" class="text-muted mb-2"></p>
+
+                                    <!-- Extra fields -->
+                                    <p class="mb-1 text-sm"><strong>Owned:</strong> <span id="bookOwned" class="text-muted"></span></p>
+                                    <p class="mb-0 text-sm"><strong>Status:</strong> <span id="bookStatus" class="text-muted"></span></p>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <hr>
+                            <p id="bookDesc" class="m-0 small text-body-secondary overflow-auto" style="max-height: 75px"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="book-stack" class="row text-center overflow-auto scrollhidden" style="margin-left: .25rem">
+                    {% for book in books %}
+                        <div id="{{ book.g_id }}-drag"
+                             data-book="{{ book.to_json() }}"
+                             class="draggable book book-horizontal book-bordered overflow-hidden test-1" style="margin-bottom: .25rem">
+                            <div class="book-title">{{ book.title }}</div>
+                            <div class="book-author">{{ book.author}}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/bookDragScripts.js') }}"></script>
+{% endblock %}
+
+

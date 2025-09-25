@@ -1,0 +1,79 @@
+<!doctype html>
+{% extends "layout.html" %}
+{% block content %}
+    <title>The Archives</title>
+
+    <div class="accordion" id="archivesAccordion">
+        <h2 class="accordion-header" id="readBooks-headingOne">
+            <button class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#readBooks"
+                    aria-expanded="true"
+                    aria-controls="readBooks-collapseOne"
+                    >
+                Read Books
+            </button>
+        </h2>
+        <div id="readBooks"
+             class="accordion-collapse collapse"
+             aria-labelledby="readBooks-headingOne"
+             data-bs-parent="#archivesAccordion">
+            <div class="accordion-body">
+                {% with books=read_books %}
+                    {% include "layout/book-grid.html" %}
+                {% endwith %}
+            </div>
+        </div>
+
+
+        <h2 class="accordion-header" id="wantToRead-headingOne">
+            <button class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#wantToRead"
+                    aria-expanded="true"
+                    aria-controls="readBooks-collapseOne"
+            >
+                Want To Read Books
+            </button>
+        </h2>
+        <div id="wantToRead"
+             class="accordion-collapse collapse"
+             aria-labelledby="wantToRead-headingOne"
+             data-bs-parent="#archivesAccordion">
+            <div class="accordion-body">
+                {% with books=want_to_read %}
+                    {% include "layout/book-grid.html" %}
+                {% endwith %}
+            </div>
+        </div>
+
+        <h2 class="accordion-header" id="ownedBooks-headingOne">
+            <button class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#ownedBooks"
+                    aria-expanded="true"
+                    aria-controls="ownedBooks-collapseOne"
+            >
+                Owned Books
+            </button>
+        </h2>
+        <div id="ownedBooks"
+             class="accordion-collapse collapse show"
+             aria-labelledby="ownedBooks-headingOne"
+             data-bs-parent="#archivesAccordion">
+            <div class="accordion-body">
+                {% with books=owned_books %}
+                    {% include "layout/book-grid.html" %}
+                {% endwith %}
+            </div>
+        </div>
+
+    </div>
+
+    {% include "content/book-modal.html" %}
+
+
+{% endblock %}
