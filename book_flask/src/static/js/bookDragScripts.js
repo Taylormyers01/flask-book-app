@@ -1,7 +1,15 @@
-$(function() {
+const spineColor = new Map([
+    ["READ", "#545C52"],
+    ["READING", "#C9CBA3"],
+    ["WANT_TO_READ", "#ABA9C3"],
+    ["NONE", "#723D46"],
+
+])
+$(function () {
     const $board = $("#board");
     const boardOffset = $board.offset();
     let displayedBook = null;
+
 
     // Make them draggable
     $(".draggable").draggable({
@@ -22,6 +30,7 @@ $(function() {
                 index: $el.index()
             });
 
+
             // Switch to absolute positioning relative to board
             $el.appendTo($board).css({
                 position: "absolute",
@@ -39,6 +48,7 @@ $(function() {
             ui.helper.css({
                 width: "50px",
                 height: "150px",
+                "z-index": "1000",
                 "text-align": "center",
                 "writing-mode": "vertical-rl",
             });
@@ -70,56 +80,49 @@ $(function() {
                     const assigned = $el.data("assigned")
                     console.log("assigned: ", assigned)
                     var newParent = $("#book-stack");
-                    if(assigned === true){
+                    if (assigned === true) {
                         console.log("Re-parenting")
                         const book = $el.data("book")
                         saveBookPosition(book.g_id, null)
                         newParent.append($el)
-                    }
-                    else if (orig.index >= orig.parent.children().length) {
+                    } else if (orig.index >= orig.parent.children().length) {
                         orig.parent.append($el);
                     } else {
                         orig.parent.children().eq(orig.index).before($el);
                     }
                 }
-            }
-            else{
+            } else {
                 const dropEle = $el.data("dropEle");
                 $el.appendTo(dropEle)
                 $el.css({
                     position: "sticky",
                 });
-            //     Reset dropSuccess
+                //     Reset dropSuccess
                 $el.data("dropSuccess", false)
             }
         },
     }).data({
         "dropSuccess": false,
         "assigned": false
-    }).click(function (event, ui){
-        const el =$(this)
+    }).click(function (event, ui) {
+        const el = $(this)
         const book = el.data("book")
         var bookView = $("#bookView")
-        const collapse = new bootstrap.Collapse(bookView, {
-            toggle: false
-        });
-        if(displayedBook && displayedBook.g_id === book.g_id){
-            bookView.toggle()
-        }else{
-            displayedBook = book
-            bookView.data("book", book)
-            $("#bookTitle").text(book.title).css("font-weight", "bold");
-            $("#bookAuthor").text("by " + book.author);
-            $("#bookDesc").text(book.description);
-            $("#bookOwned").text(book.owned ? "Yes" : "No");
-            $("#bookStatus").text(book.status || "Not set");
-            if (book.thumbnail) {
-                $("#bookImg").attr("src", book.thumbnail).show();
-            } else {
-                $("#bookImg").hide();
-            }
-            bookView.show()
+
+        displayedBook = book
+        bookView.data("book", book)
+        $("#bookTitle").text(book.title).css("font-weight", "bold");
+        $("#bookAuthor").text("by " + book.author);
+        $("#bookDesc").text(book.description);
+        $("#bookOwned").text(book.owned ? "Yes" : "No");
+        $("#bookStatus").text(book.status || "Not set");
+        if (book.thumbnail) {
+            $("#bookImg").attr("src", book.thumbnail).show();
+        } else {
+            $("#bookImg").hide();
         }
+        bookView.show()
+
     });
 
 
@@ -127,26 +130,28 @@ $(function() {
     $(".droppable").droppable({
         accept: ".draggable",
         hoverClass: "highlight",
-        drop: function(event, ui) {
+        drop: function (event, ui) {
             const $drop = $(this);
             const dropOff = $drop.offset(); // doc coords
-            const targetTop  = dropOff.top  - boardOffset.top + ($drop.outerHeight() - ui.draggable.outerHeight()) / 2;
-            const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth()  - ui.draggable.outerWidth())  / 2;
+            const targetTop = dropOff.top - boardOffset.top + ($drop.outerHeight() - ui.draggable.outerHeight()) / 2;
+            const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth() - ui.draggable.outerWidth()) / 2;
 
             const dropPosition = $drop.data("position")
             const book = ui.draggable.data("book")
-            console.log(book.g_id, dropPosition)
-            if(book.shelf_pos === null || book.shelf_pos !== dropPosition){
-                saveBookPosition(book.g_id, dropPosition)
+            if (book.shelf_pos === null || book.shelf_pos !== dropPosition) {
+                if (saveBookPosition2(book.g_id, dropPosition) === false) {
+                    console.log('failed to save')
+                    return
+                }
             }
             ui.draggable.data({
-                "dropSuccess": true,
-                "dropEle": $drop,
-                "assigned": true
+                    "dropSuccess": true,
+                    "dropEle": $drop,
+                    "assigned": true
                 }
             ).data("dropEle", $drop).data();
 
-            ui.draggable.animate({ top: targetTop, left: targetLeft }, 200, function() {
+            ui.draggable.animate({top: targetTop, left: targetLeft}, 200, function () {
                 ui.draggable.css({
                     cursor: "default",
                     opacity: 1,
@@ -156,13 +161,14 @@ $(function() {
         }
     })
     autoPlaceBooks();
+    setColors();
 });
 
 function autoPlaceBooks() {
     const $board = $("#board");
     const boardOffset = $board.offset();
 
-    $(".draggable").each(function() {
+    $(".draggable").each(function () {
         const $drag = $(this);
         const book = $drag.data("book")
         const assigned = book.shelf_pos != null
@@ -180,8 +186,8 @@ function autoPlaceBooks() {
 
             const $drop = $("#" + book.shelf_pos + "-drop");
             const dropOff = $drop.offset(); // doc coords
-            const targetTop  = dropOff.top  - boardOffset.top + ($drop.outerHeight() - $drag.outerHeight()) / 2;
-            const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth()  - $drag.outerWidth())  / 2;
+            const targetTop = dropOff.top - boardOffset.top + ($drop.outerHeight() - $drag.outerHeight()) / 2;
+            const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth() - $drag.outerWidth()) / 2;
 
             const dropPosition = $drop.data("position")
             console.log(book.g_id, dropPosition)
@@ -192,7 +198,7 @@ function autoPlaceBooks() {
                 }
             )
 
-            $drag.animate({ top: targetTop, left: targetLeft }, 800);
+            $drag.animate({top: targetTop, left: targetLeft}, 800);
 
             $drag.appendTo($drop)
             $drag.css({
@@ -204,11 +210,21 @@ function autoPlaceBooks() {
     });
 }
 
+function setColors(){
+    $(".draggable").each(function () {
+        const $drag = $(this);
+        const book = $drag.data("book");
 
+        $drag.css({
+            "background-color": spineColor.get(book.status)
+        })
+    });
+}
 
 
 function saveBookPosition(g_id, position) {
-    fetch("/update-bookshelf-order", {
+
+    const output = fetch("/update-bookshelf-order", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -220,17 +236,42 @@ function saveBookPosition(g_id, position) {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                throw new Error("Error while saving book position");
             }
             return response.json();
         })
         .then(data => {
             console.log("Position saved:", data);
+            return true;
         })
         .catch(error => {
             console.error("Error saving position:", error);
+            return false;
         });
+    console.log("saved: ", output)
+    return output;
+}
 
-
+async function saveBookPosition2(g_id, position) {
+    const url = "/update-bookshelf-order";
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                g_id: g_id,
+                position: position
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log(result);
+    } catch (error) {
+        console.error(error.message);
+    }
 }
 

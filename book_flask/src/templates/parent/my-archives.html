@@ -74,6 +74,12 @@
     </div>
 
     {% include "content/book-modal.html" %}
-
+    <script>
+        const bookModal = document.getElementById('bookModal');
+        bookModal.addEventListener('hidden.bs.modal', function (e) {
+            console.log('bruh')
+            window.location.reload();
+        });
+    </script>
 
 {% endblock %}

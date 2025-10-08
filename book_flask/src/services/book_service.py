@@ -1,5 +1,6 @@
 import os
 import requests
+from sqlalchemy import or_
 
 from logger import logger
 from models.book import Book
@@ -20,6 +21,15 @@ default_params = {
 
 
 def get_books_by_query(query, params=None):
+    """
+    Get Google books by search query -
+
+    :param query: Search parameters
+    :type query str
+    :param params: Optional custom params
+    :return: raw Google Book api response
+    :rtype dict
+    """
     if params is None:
         params = default_params
     params['q'] = query
@@ -32,6 +42,11 @@ def get_books_by_query(query, params=None):
 
 
 def get_g_book_by_g_id(gid, params=None):
+    """
+    :param gid: Google Book ID
+    :param params: Optional custom params
+    :return: Book
+    """
     if params is None:
         params = default_params
     response = requests.get(BASE_URL + f'/{gid}', params=params)
@@ -70,12 +85,19 @@ def test_data():
 def get_books_by_user_id(user_id):
     books = Book.query.join(Book.users).filter(User.id == user_id).all()
     return books
-    # books = db.session.query(Book).join(Book.users).filter(User.id==user_id).all()
+
+def get_shelf_books(user_id):
+    books = (Book.query
+             .join(Book.users)
+             .filter(User.id == user_id)
+             .filter(or_(Book.owned==True, Book.status==BookStatus.READ))
+             .all())
+    return books
 
 
 def update_user_book(search_id, current_user, status, owned):
     try:
-        optional_book = get_book_by_g_id(search_id)
+        optional_book = get_book_by_g_id(search_id, current_user)
         if optional_book:
             logger.info(f'Found book: {optional_book.g_id}, {optional_book.status}, {optional_book.owned}')
             if owned or status in VALID_STATUS:
@@ -90,7 +112,7 @@ def update_user_book(search_id, current_user, status, owned):
             return 'Book Updated', 200
         else:
             book = get_g_book_by_g_id(search_id)
-            book.users.append(current_user)
+            book.users.add(current_user)
             book.status = status
             book.owned = (owned == 'true')
             logger.info('Adding book: %s', book.to_dict())
@@ -104,13 +126,39 @@ def update_user_book(search_id, current_user, status, owned):
 
 def update_book_user(book: Book, current_user: User, add_user):
     if add_user and not current_user in book.users:
-        book.users.append(current_user)
+        book.users.add(current_user)
     if current_user in book.users and not add_user:
         book.users.remove(current_user)
     return book
 
-def get_book_by_g_id(search_id):
-    optional_book = db.session.query(Book).filter_by(g_id=search_id).first()
+
+def get_book_by_g_id(search_id, current_user):
+    # optional_book = db.session.query(Book).filter_by(g_id=search_id).filter_by().first()
+    optional_book = (Book.query.join(Book.users)
+                     .filter(User.id == current_user.id)
+                     .filter(Book.g_id == search_id)
+                     .first())
     if optional_book:
         return optional_book
     return None
+
+
+def get_book_by_position(position, current_user):
+    if not position:
+        return None
+    optional_book = (db.session.query(Book).join(Book.users)
+                     .filter(Book.shelf_pos==position)
+                     .filter(User.id==current_user.id)
+                     .first())
+    if optional_book:
+        return optional_book
+    return None
+
+def gen_home_stats(user_id):
+    authors = set()
+    all_books = get_books_by_user_id(user_id)
+    read_books = [book for book in all_books if book.status == BookStatus.READ]
+    for book in all_books:
+        auth = book.author.split(', ')
+        [authors.add(author) for author in auth]
+    return all_books, authors, read_books

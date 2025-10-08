@@ -25,7 +25,7 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-body">
-                        <h2 class="fw-bold">{{ authors|length }}</h2>
+                        <h2 class="fw-bold">{{ authors }}</h2>
                         <p class="text-muted">Unique Authors</p>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 rounded-3">
                     <div class="card-body">
-                        <h2 class="fw-bold">{{ read_books | length}}</h2>
+                        <h2 class="fw-bold">{{ read_books }}</h2>
                         <p class="text-muted">Read Books</p>
                     </div>
                 </div>
@@ -43,6 +43,7 @@
         <!-- Featured Books -->
         <h2 class="text-center mb-4">📖 Recently Added</h2>
         <div class="row">
+        {% if recent_books %}
             {% for book in recent_books %}
                 <div class="col-md-3 mb-4">
                     <div class="card h-100 shadow-sm border-0"
@@ -56,10 +57,11 @@
                         </div>
                     </div>
                 </div>
-            {% else %}
-                <p class="text-muted">No books yet. Start by adding your first one!</p>
             {% endfor %}
-        </div>
+        {% else %}
+            <p class="text-muted">No books yet. Start by adding your first one!</p>
+            </div>
+        {% endif %}
 
         <!-- Call to Action -->
         <div class="text-center mt-5">

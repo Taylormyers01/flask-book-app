@@ -1,20 +1,21 @@
 import os
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+
+from flask import Flask, redirect, render_template, url_for
 from flask_bootstrap import Bootstrap5
 from flask_cors import CORS
-from flask_login import LoginManager, login_required, current_user
+from flask_login import LoginManager, current_user
 from logger import logger
 from dotenv import load_dotenv
+from waitress import serve
 
 from models.constants import BookStatus
 from routes.test_routes import test_bp
-from services.book_service import test_data
+from routes.user_routes import user_bp
+from services.book_service import test_data, gen_home_stats
 from services.db import db
-from services import user_service
 from models.user import User
 from routes.auth_routes import auth_bp
 from routes.book_routes import book_bp
-from utils import seed
 from utils.seed import Seeder
 
 app = Flask(__name__)
@@ -43,6 +44,7 @@ def load_user(user_id):
 app.register_blueprint(auth_bp)
 app.register_blueprint(book_bp)
 app.register_blueprint(test_bp)
+app.register_blueprint(user_bp)
 
 @app.route("/")
 def default():
@@ -52,38 +54,34 @@ def default():
 def inject_enums():
     return dict(BookStatus=BookStatus)
 
+
 @app.route('/home/')
-def home(name=None):
+def home():
     if current_user.is_authenticated:
+        all_books, authors, read_books = gen_home_stats(current_user.id)
         return render_template('parent/home.html',
-                               total_books=10, authors=[' ',' '], read_books=[' ',' '], recent_books=test_data()[:4])
+                               total_books=len(all_books), authors=len(authors), read_books=len(read_books), recent_books=test_data()[:4])
     return render_template('parent/home.html',
-                           total_books=0, authors=[], read_books=[], recent_books=[])
+                           total_books=0, authors=0, read_books=0, recent_books=[])
+
 
 @app.route('/book')
 def book():
     return render_template('parent/catalog-search.html', books=[{"name": "book1"}, {"name": "book2"}, {"name": "book3"}])
 
-# @app.route('/add_user', methods=['POST'])
-# def add_user():
-#     name = request.json.get('name')
-#     logger.info(f'Received request to add user: {name}')
-#     output = user_service.add_user(name=name)
-#     return output
-
-@app.route('/users', methods=['GET'])
-@app.route('/users/<name>', methods=['GET'])
-def list_users(name=None):
-    return user_service.get_user_by_name(name=name)
 
 def run_flask():
-    app.run(port=5000, debug=True, use_reloader=True)
+    logger.info('App served on port: %s', 5000)
+    app.debug = True
+    serve(app, host="0.0.0.0", port=5000)
+
 
 if __name__ == '__main__':
     dotenv_path = os.path.join(basedir, 'dev.env')
-    print(f"Loading environment variables from {dotenv_path}")
+    logger.info(f"Loading environment variables from {dotenv_path}")
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
+        logger.info("ENV Variables Loaded")
     with app.app_context():
         logger.info('Creating DB')
         db.create_all()

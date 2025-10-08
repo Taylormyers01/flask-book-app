@@ -125,7 +125,6 @@
         let formData = new FormData(bookForm);
         fetch('/update-book', {
             method: "POST",
-            {#body: formData#}
             body: formData
         }).then(response =>{
             if (!response.ok) {
@@ -133,8 +132,7 @@
             }
             const bookModal = document.getElementById('bookModal');
             const modalInstance = bootstrap.Modal.getInstance(bookModal);
-            modalInstance.toggle()
-            window.location.reload()
+            modalInstance.toggle();
             return response.json();
         });
     }

@@ -12,7 +12,7 @@ from sqlalchemy import inspect, Enum, Column
 class Book(db.Model):
     __tablename__ = "books"
     id = Column(db.Integer, primary_key=True)
-    g_id = Column(db.String(50), unique=True, nullable=False, index=True)
+    g_id = Column(db.String(50), nullable=False)
     title = Column(db.String(100), nullable=False)
     author = Column(db.String(100), nullable=False)
     thumbnail = Column(db.String(200), nullable=True)

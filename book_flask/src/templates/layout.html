@@ -14,7 +14,7 @@
     {% endblock %}
 </head>
 <body class="color" style="background:lightgrey">
-<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light" style="height: 6%">
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light" style="max-height:50px">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('home') }}">Book-Flask</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -26,10 +26,6 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link active" aria-current="page"
                                         href="{{ url_for('home') }}">Home</a></li>
-{#                <li class="nav-item"><a class="nav-link active" aria-current="page"#}
-{#                                        href="{{ url_for('test.get_test_drop') }}">Test Drag and Drop</a></li>#}
-{#                <li class="nav-item"><a class="nav-link active" aria-current="page"#}
-{#                                        href="{{ url_for('test.get_test_card') }}">Test Card</a></li>#}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
@@ -73,16 +69,12 @@
                 </li>
                 {% endif %}
             </ul>
-            <!-- <form class="d-flex">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form> -->
-
         </div>
     </div>
 </nav>
 <div class="container-lg" style="background: white; padding-top: 3rem;">
     {% block content %}{% endblock %}
+    {% include 'content/toast-alert.html'%}
 </div>
 {% include 'content/login.html' %}
 {% block scripts %}

@@ -1,4 +1,6 @@
-from flask import Blueprint, request, redirect, render_template, url_for
+from tkinter import EXCEPTION
+
+from flask import Blueprint, request, redirect, render_template, url_for, flash
 from flask_login import login_user, logout_user, login_required
 from services.auth_service import register_user, authenticate_user
 from logger import logger
@@ -21,11 +23,19 @@ def login():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if register_user(username, password):
-            return redirect(url_for('auth.login'))
-        return "User already exists", 400
+        try:
+            data = request.json
+            username = data.get('username', None)
+            password = data.get('password', None)
+            if register_user(username, password):
+                new_user = authenticate_user(username, password)
+                login_user(new_user)
+                flash(f'Welcome {username}, to Book-Flask!', 'success')
+                return redirect(url_for('/'))
+        except Exception as e:
+            logger.exception(f'Exception while creating user {e}')
+            return "Ran into an issue creating user", 204
+
     return render_template('content/register.html')
 
 @auth_bp.route('/logout')

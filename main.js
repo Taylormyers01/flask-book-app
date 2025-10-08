@@ -4,6 +4,7 @@ const { spawn } = require('child_process');
 
 let mainWindow;
 let pythonProcess;
+const startupLog = 'App served on port: '
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -14,9 +15,10 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadURL('http://127.0.0.1:5000/hello');
+  mainWindow.loadURL('http://127.0.0.1:5000/');
   mainWindow.on('closed', () => {
     mainWindow = null;
+    if (pythonProcess) pythonProcess.kill();
   });
 }
 
@@ -27,7 +29,7 @@ function startPythonServer() {
   pythonProcess.stdout.on('data', (data) => {
     const msg = data.toString();
     console.log(msg);
-    if (msg.includes('Running on')) {
+    if (msg.includes(startupLog)) {
       createWindow();
     }
   });
@@ -36,7 +38,7 @@ function startPythonServer() {
     console.error(`stderr: ${data}`);
     const msg = data.toString();
     console.log(msg);
-    if (msg.includes('Running on')) {
+    if (msg.includes(startupLog)) {
       createWindow();
     }
   });

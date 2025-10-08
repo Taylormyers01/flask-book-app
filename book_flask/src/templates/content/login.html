@@ -1,26 +1,130 @@
 <!doctype html>
 <div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-  aria-labelledby="loginModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Login</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="{{ url_for('auth.login') }}">
-          <input type="text" name="username" placeholder="Username" required>
-          <input type="password" name="password" placeholder="Password" required>
-          <button type="submit">Login</button>
-        </form>
-      <a href="{{ url_for('auth.register') }}">Create User</a>
-      </div>
+     aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <input type="text" name="username" placeholder="Username" required>
+                    <input type="password" name="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                {#      <a href="{{ url_for('auth.register') }}">Create User</a>#}
+                <button
+                        class="btn"
+                        data-bs-target="#registerModal"
+                        data-bs-toggle="modal"
+                        data-bs-dismiss="modal">
+                    Create an Account
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
-{#<script>#}
-{#    document.addEventListener('DOMContentLoaded', function() {#}
-{#        var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {});#}
-{#        myModal.show();#}
-{#    });#}
-{#</script>#}
+
+<!-- Register Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="registerModalLabel">Create an Account</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="registerForm" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" required>
+                        <div class="invalid-feedback">Please enter a username.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password1" required>
+                        <div id="passwordStrength" class="form-text text-muted small"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="password2" required>
+                        <div class="invalid-feedback">Passwords must match.</div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-secondary w-100">Register</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("registerForm");
+        const pass1 = document.getElementById("password1");
+        const pass2 = document.getElementById("password2");
+        const strengthText = document.getElementById("passwordStrength");
+
+        // Check password strength
+        pass1.addEventListener("input", function () {
+            const val = pass1.value;
+            let strength = "Weak";
+            let color = "red";
+
+            if (val.length > 8 && /[A-Z]/.test(val) && /\d/.test(val) && /[^A-Za-z0-9]/.test(val)) {
+                strength = "Strong";
+                color = "green";
+            } else if (val.length >= 6 && (/[A-Z]/.test(val) || /\d/.test(val))) {
+                strength = "Medium";
+                color = "orange";
+            }
+
+            strengthText.textContent = `Password Strength: ${strength}`;
+            strengthText.style.color = color;
+        });
+
+        // Confirm password match
+        pass2.addEventListener("input", function () {
+            if (pass2.value !== pass1.value) {
+                pass2.setCustomValidity("Passwords do not match");
+            } else {
+                pass2.setCustomValidity("");
+            }
+        });
+
+        // Submit handler
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (!form.checkValidity()) {
+                form.classList.add("was-validated");
+                return;
+            }
+
+            // Example payload (you can send via fetch to Flask)
+            const data = {
+                username: document.getElementById("username").value,
+                password: pass1.value
+            };
+            console.log(data)
+
+            // TODO: send to your Flask endpoint
+            fetch("/register", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {"Content-Type": "application/json"}
+            }).then(res => {
+                if(res.status === 204){
+                    showToast('User already created', 'danger')
+                }else{
+                    window.location.href = "/home";
+                }
+            });
+        });
+    });
+</script>

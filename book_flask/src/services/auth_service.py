@@ -4,8 +4,11 @@ from logger import logger
 import json
 
 def register_user(username, password):
-    reg_user = User(username=username)
+    if username is None or password is None:
+        return None
+    reg_user = User()
     logger.info(f"Registering user: {username}")
+    reg_user.username = username
     reg_user.set_password(password)
     db.session.add(reg_user)
     db.session.commit()
