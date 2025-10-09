@@ -22,7 +22,7 @@ default_params = {
 
 def get_books_by_query(query, params=None):
     """
-    Get Google books by search query -
+    Get Google books by search string
 
     :param query: Search parameters
     :type query str
@@ -41,7 +41,7 @@ def get_books_by_query(query, params=None):
         return "No books found"
 
 
-def get_g_book_by_g_id(gid, params=None):
+def get_google_book_data_by_id(gid, params=None):
     """
     :param gid: Google Book ID
     :param params: Optional custom params
@@ -56,6 +56,13 @@ def get_g_book_by_g_id(gid, params=None):
 
 
 def generate_book_from_g_data(g_data) -> Book:
+    """
+    Create book object from Google Book Api payload
+
+    :param g_data:
+    :return:
+    :rtype Book
+    """
     new_book = Book(
         title=g_data.get('volumeInfo', {}).get('title', 'Unknown Title'),
         g_id=g_data.get('id', 'Unknown ID'),
@@ -69,11 +76,11 @@ def generate_book_from_g_data(g_data) -> Book:
         categories=', '.join(g_data.get('volumeInfo', {}).get('categories', [])),
         info_link=g_data.get('volumeInfo', {}).get('infoLink'),
         preview_link=g_data.get('volumeInfo', {}).get('previewLink')
-
     )
     return new_book
 
 
+# TODO remove
 def test_data():
     g_data = get_books_by_query("Brandon Sanderson")
     books = [generate_book_from_g_data(data) for data in g_data.get('items', [])]
@@ -83,12 +90,27 @@ def test_data():
 
 
 def get_books_by_user_id(user_id):
-    books = Book.query.join(Book.users).filter(User.id == user_id).all()
+    """
+    Get all books by user
+
+    :param user_id: int
+    :return: All books tied to user
+    :rtype Book[]
+    """
+    books = Book.query.join(Book.user).filter(User.id == user_id).all()
     return books
 
 def get_shelf_books(user_id):
+    """
+    Get all books that are on your shelf
+
+    Any books you own or have read - still deciding on if read books should be
+    included in your shelf
+    :param user_id: int
+    :return:
+    """
     books = (Book.query
-             .join(Book.users)
+             .join(Book.user)
              .filter(User.id == user_id)
              .filter(or_(Book.owned==True, Book.status==BookStatus.READ))
              .all())
@@ -96,23 +118,25 @@ def get_shelf_books(user_id):
 
 
 def update_user_book(search_id, current_user, status, owned):
+    """
+
+    :param search_id: int -> google book id aka g_id
+    :param current_user: User
+    :param status: BookStatus
+    :param owned: Boolean
+    :return: str, int
+    """
     try:
         optional_book = get_book_by_g_id(search_id, current_user)
         if optional_book:
             logger.info(f'Found book: {optional_book.g_id}, {optional_book.status}, {optional_book.owned}')
-            if owned or status in VALID_STATUS:
-                logger.info('Adding user to book')
-                optional_book = update_book_user(optional_book, current_user, True)
-            else:
-                logger.info('Removing user from book')
-                optional_book = update_book_user(optional_book, current_user, False)
             optional_book.owned = (owned == 'true' if owned else False)
             optional_book.status = status
             db.session.commit()
             return 'Book Updated', 200
         else:
-            book = get_g_book_by_g_id(search_id)
-            book.users.add(current_user)
+            book = get_google_book_data_by_id(search_id)
+            book.user = current_user
             book.status = status
             book.owned = (owned == 'true')
             logger.info('Adding book: %s', book.to_dict())
@@ -124,17 +148,31 @@ def update_user_book(search_id, current_user, status, owned):
         return 'Error creating book', 400
 
 
-def update_book_user(book: Book, current_user: User, add_user):
-    if add_user and not current_user in book.users:
-        book.users.add(current_user)
-    if current_user in book.users and not add_user:
-        book.users.remove(current_user)
-    return book
+# def update_book_user(book: Book, current_user: User, add_user):
+#     """
+#     Re-usable logic for adding/removing user -> review need for this method
+#
+#     :param book: Book
+#     :param current_user: User
+#     :param add_user: Boolean
+#     :return:
+#     """
+#     if add_user:
+#         book.user.add(current_user)
+#     if current_user in book.user and not add_user:
+#         book.user.remove(current_user)
+#     return book
 
 
 def get_book_by_g_id(search_id, current_user):
-    # optional_book = db.session.query(Book).filter_by(g_id=search_id).filter_by().first()
-    optional_book = (Book.query.join(Book.users)
+    """
+    Get book by g_id and current user
+
+    :param search_id: int
+    :param current_user: User
+    :return:
+    """
+    optional_book = (Book.query.join(Book.user)
                      .filter(User.id == current_user.id)
                      .filter(Book.g_id == search_id)
                      .first())
@@ -144,9 +182,16 @@ def get_book_by_g_id(search_id, current_user):
 
 
 def get_book_by_position(position, current_user):
+    """
+    Used by shelf to get book by position and User
+
+    :param position: int
+    :param current_user: User
+    :return:
+    """
     if not position:
         return None
-    optional_book = (db.session.query(Book).join(Book.users)
+    optional_book = (db.session.query(Book).join(Book.user)
                      .filter(Book.shelf_pos==position)
                      .filter(User.id==current_user.id)
                      .first())
@@ -155,6 +200,12 @@ def get_book_by_position(position, current_user):
     return None
 
 def gen_home_stats(user_id):
+    """
+    Get unique Authors, all books and read books by user
+
+    :param user_id:
+    :return:
+    """
     authors = set()
     all_books = get_books_by_user_id(user_id)
     read_books = [book for book in all_books if book.status == BookStatus.READ]

@@ -22,8 +22,6 @@ class Seeder:
             self.add_users()
             self.add_books()
             self.db.session.commit()
-            self.link_users_books()
-            self.db.session.commit()
             print("✅ Database seeded successfully!")
         else:
             print("Database not flagged for seeding")
@@ -53,12 +51,6 @@ class Seeder:
         for book in self.book_list:
             book.owned = random.choice([True, False])
             book.status = random.choice([status for status in BookStatus])
+            book.user = random.choice([self.user1, self.user2])
         self.db.session.add_all(self.book_list)
         print("📚 Books added.")
-
-    def link_users_books(self):
-        for i in range(20):
-            self.user1.books.add(self.book_list[i])
-        for i in range(20, 40):
-            self.user2.books.add(self.book_list[i])
-        print("🔗 User-book relationships created.")

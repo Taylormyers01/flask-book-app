@@ -1,21 +1,19 @@
 
-``` 
+```bash 
 flask app --debug  
 ```
-```
+```bash
 pyinstaller --onefile \
   --add-data "templates:templates" \
   --add-data "static:static" \
   app.py
 
 cp dist/app ../flask_server/
-
 ```
+
 # book_flask
 
 
-```bash
-````
 ```bash
 cd book_flask/src
 

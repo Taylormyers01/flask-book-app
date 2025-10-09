@@ -65,7 +65,7 @@
                                     <!-- Owned Checkbox -->
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="checkbox" name="owned" id="ownedCheckbox"
-                                               value="false"
+                                               value="True"
                                         >
                                         <label class="form-check-label" for="ownedCheckbox">
                                             Owned
@@ -108,9 +108,10 @@
             document.getElementById('authorInput').value = book_data.author;
             document.getElementById('statusInput').value = book_data.status;
 
-            if (book_data.owned){
-                document.getElementById('ownedCheckbox').value = true
+            if (book_data.owned === true){
                 document.getElementById('ownedCheckbox').checked = true
+            }else{
+                document.getElementById('ownedCheckbox').checked = false
             }
             document.getElementById('bookThumnail').src = book_data.thumbnail;
             document.getElementById('descriptionInput').textContent = book_data.description;

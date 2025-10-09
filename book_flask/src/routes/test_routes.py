@@ -1,9 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template
-from flask_login import login_required, current_user
 
-from models.user import User
-from services.book_service import test_data, update_book_user, get_books_by_user_id
-from services.db import db
+from services.book_service import get_books_by_user_id
 
 test_bp = Blueprint('test', __name__)
 

@@ -27,11 +27,17 @@ def my_archives():
 
 @book_bp.route('/search-catalog')
 def search_catalog():
+    """
+    Search catalog HTML -> javascript handles updating search results
+    """
     return render_template('parent/catalog-search.html', books=[], next=url_for('book.search_catalog'))
 
 
 @book_bp.route('/update-catalog')
 def update_catalog():
+    """
+    Renders book-grid with results from query
+    """
     query = request.args.get("q", "").lower()
     template_books = []
     if query:
@@ -74,10 +80,11 @@ def update_bookshelf_order():
 def update_book():
     logger.info(f'Form data: {request.form}')
     if request.method == 'POST' and current_user.is_authenticated:
+        logger.info(request.form)
         g_id = request.form.get('g_id', None)
         status = request.form.get('status', None)
-        owned = request.form.get('owned', None)
-        logger.info(f'Updating book: {g_id} Status: {status} Owned: {owned}')
+        owned = request.form.get('owned', False)
+        logger.info(f'Received request to update book: {g_id} Status: {status} Owned: {owned}')
         outcome = update_user_book(g_id, current_user, status, owned)
         success = outcome[1] == 200
         return jsonify(success=success, g_id=g_id)
