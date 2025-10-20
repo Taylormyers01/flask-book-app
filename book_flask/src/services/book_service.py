@@ -1,11 +1,15 @@
 import os
+from xmlrpc.client import boolean
+
 import requests
-from sqlalchemy import or_
+from sqlalchemy import or_, Boolean
+from sqlalchemy.testing.suite.test_reflection import users
 
 from logger import logger
 from models.book import Book
 from models.constants import BookStatus
 from models.user import User
+from models.user_book import UserBook
 from services.db import db
 
 G_API_KEY = os.environ.get('G_API_KEY')
@@ -89,32 +93,18 @@ def test_data():
     return books
 
 
-def get_books_by_user_id(user_id):
-    """
-    Get all books by user
-
-    :param user_id: int
-    :return: All books tied to user
-    :rtype Book[]
-    """
-    books = Book.query.join(Book.user).filter(User.id == user_id).all()
-    return books
-
-def get_shelf_books(user_id):
+def get_shelf_books(current_user):
     """
     Get all books that are on your shelf
 
     Any books you own or have read - still deciding on if read books should be
     included in your shelf
-    :param user_id: int
+    :param current_user: User
     :return:
     """
-    books = (Book.query
-             .join(Book.user)
-             .filter(User.id == user_id)
-             .filter(or_(Book.owned==True, Book.status==BookStatus.READ))
-             .all())
-    return books
+    shelf_books = [ub.book for ub in current_user.user_books
+                   if ub.owned==True or ub.status==BookStatus.READ]
+    return shelf_books
 
 
 def update_user_book(search_id, current_user, status, owned):
@@ -127,44 +117,44 @@ def update_user_book(search_id, current_user, status, owned):
     :return: str, int
     """
     try:
-        optional_book = get_book_by_g_id(search_id, current_user)
-        if optional_book:
-            logger.info(f'Found book: {optional_book.g_id}, {optional_book.status}, {optional_book.owned}')
-            optional_book.owned = (owned == 'true' if owned else False)
-            optional_book.status = status
+        u_book = current_user.get_user_book(search_id)
+        if u_book:
+            logger.info(f'User->Book relationship exists - updating status: {status} owned: {owned}')
+            u_book.status = status
+            u_book.owned = bool(owned)
             db.session.commit()
             return 'Book Updated', 200
         else:
-            book = get_google_book_data_by_id(search_id)
-            book.user = current_user
-            book.status = status
-            book.owned = (owned == 'true')
-            logger.info('Adding book: %s', book.to_dict())
-            db.session.add(book)
-            db.session.commit()
-            return 'Book Created', 200
+            optional_book = get_book_if_exists(search_id)
+            if optional_book:
+                logger.info(f'Found book to update: {optional_book.g_id}')
+                u_book = UserBook(
+                    owned=boolean(owned),
+                    status=status,
+                    user=current_user,
+                    book=optional_book
+                )
+                db.session.add(u_book)
+                db.session.commit()
+                return 'Book Updated', 200
+            else:
+                book = get_google_book_data_by_id(search_id)
+                logger.info(f'Adding book g_id: {book.g_id}')
+                u_book = UserBook(
+                    user=current_user,
+                    book=book,
+                    status=status,
+                    owned=boolean(owned)
+                )
+                db.session.add(u_book)
+                db.session.commit()
+                return 'Book Created', 200
     except Exception as e:
         logger.error(f'Encounter error while saving Book:{search_id}, {e}')
         return 'Error creating book', 400
 
 
-# def update_book_user(book: Book, current_user: User, add_user):
-#     """
-#     Re-usable logic for adding/removing user -> review need for this method
-#
-#     :param book: Book
-#     :param current_user: User
-#     :param add_user: Boolean
-#     :return:
-#     """
-#     if add_user:
-#         book.user.add(current_user)
-#     if current_user in book.user and not add_user:
-#         book.user.remove(current_user)
-#     return book
-
-
-def get_book_by_g_id(search_id, current_user):
+def get_book_by_g_id_old(search_id, current_user):
     """
     Get book by g_id and current user
 
@@ -180,6 +170,8 @@ def get_book_by_g_id(search_id, current_user):
         return optional_book
     return None
 
+def get_book_if_exists(g_id):
+    return Book.query.filter_by(g_id=g_id).first()
 
 def get_book_by_position(position, current_user):
     """
@@ -191,24 +183,19 @@ def get_book_by_position(position, current_user):
     """
     if not position:
         return None
-    optional_book = (db.session.query(Book).join(Book.user)
-                     .filter(Book.shelf_pos==position)
-                     .filter(User.id==current_user.id)
-                     .first())
-    if optional_book:
-        return optional_book
-    return None
+    return next((ub.book for ub in current_user.user_books if ub.shelf_pos == position), None)
 
-def gen_home_stats(user_id):
+
+def gen_home_stats(user):
     """
     Get unique Authors, all books and read books by user
 
-    :param user_id:
+    :param user:
     :return:
     """
     authors = set()
-    all_books = get_books_by_user_id(user_id)
-    read_books = [book for book in all_books if book.status == BookStatus.READ]
+    all_books = [ub.book for ub in user.user_books]
+    read_books = [ub.book for ub in user.user_books if ub.status == BookStatus.READ]
     for book in all_books:
         auth = book.author.split(', ')
         [authors.add(author) for author in auth]

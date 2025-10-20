@@ -58,16 +58,11 @@ def inject_enums():
 @app.route('/home/')
 def home():
     if current_user.is_authenticated:
-        all_books, authors, read_books = gen_home_stats(current_user.id)
+        all_books, authors, read_books = gen_home_stats(current_user)
         return render_template('parent/home.html',
                                total_books=len(all_books), authors=len(authors), read_books=len(read_books), recent_books=test_data()[:4])
     return render_template('parent/home.html',
                            total_books=0, authors=0, read_books=0, recent_books=[])
-
-
-@app.route('/book')
-def book():
-    return render_template('parent/catalog-search.html', books=[{"name": "book1"}, {"name": "book2"}, {"name": "book3"}])
 
 
 def run_flask():

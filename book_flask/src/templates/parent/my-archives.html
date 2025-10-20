@@ -75,9 +75,14 @@
 
     {% include "content/book-modal.html" %}
     <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         const bookModal = document.getElementById('bookModal');
-        bookModal.addEventListener('hidden.bs.modal', function (e) {
+        bookModal.addEventListener('hidden.bs.modal', async function (e) {
             console.log('bruh')
+            await sleep(1000)
             window.location.reload();
         });
     </script>

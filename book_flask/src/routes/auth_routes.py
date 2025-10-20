@@ -7,17 +7,20 @@ from logger import logger
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
     if request.method == 'POST':
-        found_user = authenticate_user(request.form['username'], request.form['password'])
+        data = request.json
+        username = data.get('username', None)
+        password = data.get('password', None)
+        found_user = authenticate_user(username, password)
         if found_user:
             login_user(found_user)
             next = request.args.get('next', None)
             if next:
                 return redirect(next)
             return redirect(url_for('home', name=found_user.username))
-        return "Invalid credentials", 401
+        return 'No User found', 204
     return render_template('content/login.html')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -31,12 +34,10 @@ def register():
                 new_user = authenticate_user(username, password)
                 login_user(new_user)
                 flash(f'Welcome {username}, to Book-Flask!', 'success')
-                return redirect(url_for('/'))
+                return redirect(url_for('home'))
         except Exception as e:
             logger.exception(f'Exception while creating user {e}')
             return "Ran into an issue creating user", 204
-
-    return render_template('content/register.html')
 
 @auth_bp.route('/logout')
 @login_required

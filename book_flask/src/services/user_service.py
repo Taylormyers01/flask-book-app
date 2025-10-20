@@ -13,11 +13,3 @@ def get_user_by_name(name: str):
         users.extend(User.query.all())
     logger.info(f'Users found: {len(users)}')
     return jsonify([{"id": u.id, "name": u.username} for u in users])
-
-def add_user(name):
-    logger.info(f'adding user {name}')
-    new_user = User(name=name)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"message": "User added", "user": {"id": new_user.id, "name": new_user.username}})
-    

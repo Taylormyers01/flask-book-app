@@ -1,3 +1,5 @@
+from flask_login import login_user
+
 from models.user import User
 from services.db import db
 from logger import logger
@@ -19,3 +21,7 @@ def authenticate_user(username, password):
     if auth_user and auth_user.check_password(password):
         return auth_user
     return None
+
+def refresh_user(current_user):
+    user = User.query.get(current_user.id)
+    login_user(user)

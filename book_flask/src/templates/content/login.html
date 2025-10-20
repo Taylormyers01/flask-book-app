@@ -8,9 +8,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ url_for('auth.login') }}">
-                    <input type="text" name="username" placeholder="Username" required>
-                    <input type="password" name="password" placeholder="Password" required>
+{#                method="POST" action="{{ url_for('auth.login') }}"#}
+                <form id="loginForm">
+                    <input id="login-username" type="text" name="username" placeholder="Username" required>
+                    <input id="login-password" type="password" name="password" placeholder="Password" required>
                     <button type="submit">Login</button>
                 </form>
                 {#      <a href="{{ url_for('auth.register') }}">Create User</a>#}
@@ -67,8 +68,11 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("registerForm");
+        const form2 = document.getElementById("loginForm");
         const pass1 = document.getElementById("password1");
         const pass2 = document.getElementById("password2");
+        const loginPass = document.getElementById("login-password");
+        const loginUsername = document.getElementById("login-username");
         const strengthText = document.getElementById("passwordStrength");
 
         // Check password strength
@@ -98,6 +102,25 @@
             }
         });
 
+        form2.addEventListener("submit", function (e) {
+            const data = {
+                username: loginUsername.value,
+                password: loginPass.value
+            };
+            fetch("/login", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {"Content-Type": "application/json"}
+            }).then(res => {
+                if(res.status === 204){
+                    showToast('User not found', 'danger')
+                }else{
+                    window.location.href = "/home";
+                }
+            });
+
+        })
+
         // Submit handler
         form.addEventListener("submit", function (e) {
             e.preventDefault();
@@ -111,9 +134,7 @@
                 username: document.getElementById("username").value,
                 password: pass1.value
             };
-            console.log(data)
 
-            // TODO: send to your Flask endpoint
             fetch("/register", {
                 method: "POST",
                 body: JSON.stringify(data),

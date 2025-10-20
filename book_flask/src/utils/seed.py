@@ -6,12 +6,16 @@ from werkzeug.security import generate_password_hash
 from models.book import Book
 from models.constants import BookStatus
 from models.user import User
+from models.user_book import UserBook
 from services.book_service import test_data
 
 
 class Seeder:
     def __init__(self, db):
         self.db = db
+        self.user1 = None
+        self.user2 = None
+        self.book_list = []
 
     def seed(self):
         seed = os.environ.get('SEED', 'false')
@@ -31,6 +35,7 @@ class Seeder:
         # Clear in reverse dependency order
         self.db.session.query(User).delete()
         self.db.session.query(Book).delete()
+        self.db.session.query(UserBook).delete()
         self.db.session.commit()
         print("🗑️  Old data cleared.")
 
@@ -43,14 +48,17 @@ class Seeder:
             username="erin",
             password_hash=generate_password_hash("erin")
         )
-        self.db.session.add_all([self.user1, self.user2])
         print("👤 Users added.")
 
     def add_books(self):
         self.book_list = test_data()
         for book in self.book_list:
-            book.owned = random.choice([True, False])
-            book.status = random.choice([status for status in BookStatus])
-            book.user = random.choice([self.user1, self.user2])
-        self.db.session.add_all(self.book_list)
+            u_book = UserBook(
+                owned=random.choice([True, False]),
+                status=random.choice([status for status in BookStatus]),
+                user=random.choice([self.user1, self.user2]),
+                book=book
+            )
+            self.db.session.add(u_book)
+        self.db.session.commit()
         print("📚 Books added.")
