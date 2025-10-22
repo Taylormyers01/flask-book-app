@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     username = Column(db.String(80), unique=True, nullable=False)
     password_hash = Column(db.String(128), nullable=False)
     user_books = db.relationship("UserBook", back_populates="user", cascade="all, delete-orphan")
+    user_ol_books = db.relationship("UserOlBook", back_populates="user", cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method="pbkdf2:sha256")

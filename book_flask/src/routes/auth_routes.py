@@ -9,19 +9,18 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        data = request.json
-        username = data.get('username', None)
-        password = data.get('password', None)
-        found_user = authenticate_user(username, password)
-        if found_user:
-            login_user(found_user)
-            next = request.args.get('next', None)
-            if next:
-                return redirect(next)
-            return redirect(url_for('home', name=found_user.username))
-        return 'No User found', 204
-    return render_template('content/login.html')
+    data = request.json
+    username = data.get('username', None)
+    password = data.get('password', None)
+    found_user = authenticate_user(username, password)
+    if found_user:
+        logger.info(f'User found {username}')
+        login_user(found_user)
+        next = request.args.get('next', None)
+        if next:
+            return redirect(next)
+        return redirect(url_for('home', name=found_user.username))
+    return 'No User found', 204
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():

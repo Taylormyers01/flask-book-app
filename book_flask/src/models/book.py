@@ -17,13 +17,13 @@ class Book(db.Model):
     author = Column(db.String(100), nullable=False)
     thumbnail = Column(db.String(200), nullable=True)
     thumbnail_small = Column(db.String(200), nullable=True)
-    short_description = Column(db.String(200), nullable=True)
+    # short_description = Column(db.String(200), nullable=True)
     description = Column(db.Text, nullable=True)
     page_count = Column(db.Integer, nullable=True)
     published_date = Column(db.String(20), nullable=True)
     categories = Column(db.String(200), nullable=True)
-    info_link = Column(db.String(200), nullable=True)
-    preview_link = Column(db.String(200), nullable=True)
+    # info_link = Column(db.String(200), nullable=True)
+    # preview_link = Column(db.String(200), nullable=True)
 
     # Relationship with user specific data
     user_books = relationship("UserBook", back_populates="book", cascade="all, delete-orphan")

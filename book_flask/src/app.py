@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from waitress import serve
 
 from models.constants import BookStatus
+from routes.ol_book_routes import ol_book_bp
 from routes.test_routes import test_bp
 from routes.user_routes import user_bp
 from services.book_service import test_data, gen_home_stats
@@ -45,6 +46,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(book_bp)
 app.register_blueprint(test_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(ol_book_bp)
 
 @app.route("/")
 def default():
@@ -80,8 +82,8 @@ if __name__ == '__main__':
     with app.app_context():
         logger.info('Creating DB')
         db.create_all()
-        seed = Seeder(db)
-        seed.seed()
+        # seed = Seeder(db)
+        # seed.seed()
     logger.info('DB created successfully')
     run_flask()
     

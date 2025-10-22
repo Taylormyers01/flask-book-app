@@ -73,13 +73,13 @@ def generate_book_from_g_data(g_data) -> Book:
         author=', '.join(g_data.get('volumeInfo', {}).get('authors', ['Unknown Author'])),
         thumbnail=g_data.get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', None),
         thumbnail_small=g_data.get('volumeInfo', {}).get('imageLinks', {}).get('smallThumbnail', None),
-        short_description=g_data.get('searchInfo', {}).get('textSnippet'),
+        # short_description=g_data.get('searchInfo', {}).get('textSnippet'),
         description=g_data.get('volumeInfo', {}).get('description'),
         page_count=g_data.get('volumeInfo', {}).get('pageCount'),
         published_date=g_data.get('volumeInfo', {}).get('publishedDate'),
-        categories=', '.join(g_data.get('volumeInfo', {}).get('categories', [])),
-        info_link=g_data.get('volumeInfo', {}).get('infoLink'),
-        preview_link=g_data.get('volumeInfo', {}).get('previewLink')
+        categories=', '.join(g_data.get('volumeInfo', {}).get('categories', []))
+        # info_link=g_data.get('volumeInfo', {}).get('infoLink'),
+        # preview_link=g_data.get('volumeInfo', {}).get('previewLink')
     )
     return new_book
 

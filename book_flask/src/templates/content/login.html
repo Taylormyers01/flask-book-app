@@ -8,20 +8,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-{#                method="POST" action="{{ url_for('auth.login') }}"#}
                 <form id="loginForm">
-                    <input id="login-username" type="text" name="username" placeholder="Username" required>
-                    <input id="login-password" type="password" name="password" placeholder="Password" required>
-                    <button type="submit">Login</button>
+                    <div class="row">
+                        <div class="col">
+                            <input id="loginUsername" type="text"
+                                   name="username"
+                                   placeholder="Username"
+                                   class="form-control"
+                                   required>
+                        </div>
+                        <div class="col">
+                            <input id="loginPassword"
+                                   type="password"
+                                   name="password"
+                                   placeholder="Password"
+                                   class="form-control"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <button type="submit" class="btn btn-outline-secondary">Login</button>
+                            <button
+                                    class="btn btn-secondary"
+                                    data-bs-target="#registerModal"
+                                    data-bs-toggle="modal"
+                                    data-bs-dismiss="modal">
+                                Create an Account
+                            </button>
+                        </div>
+                    </div>
                 </form>
-                {#      <a href="{{ url_for('auth.register') }}">Create User</a>#}
-                <button
-                        class="btn"
-                        data-bs-target="#registerModal"
-                        data-bs-toggle="modal"
-                        data-bs-dismiss="modal">
-                    Create an Account
-                </button>
+
             </div>
         </div>
     </div>
@@ -71,8 +89,8 @@
         const form2 = document.getElementById("loginForm");
         const pass1 = document.getElementById("password1");
         const pass2 = document.getElementById("password2");
-        const loginPass = document.getElementById("login-password");
-        const loginUsername = document.getElementById("login-username");
+        const loginPass = document.getElementById("loginPassword");
+        const loginUsername = document.getElementById("loginUsername");
         const strengthText = document.getElementById("passwordStrength");
 
         // Check password strength
@@ -103,6 +121,7 @@
         });
 
         form2.addEventListener("submit", function (e) {
+            e.preventDefault();
             const data = {
                 username: loginUsername.value,
                 password: loginPass.value
@@ -115,7 +134,7 @@
                 if(res.status === 204){
                     showToast('User not found', 'danger')
                 }else{
-                    window.location.href = "/home";
+                    window.location.href = "";
                 }
             });
 
