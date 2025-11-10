@@ -1,3 +1,6 @@
+import json
+
+from flask_login import current_user
 from sqlalchemy import Column, inspect
 from sqlalchemy.orm import relationship
 
@@ -31,3 +34,32 @@ class OlBook(db.Model):
             c.key: getattr(self, c.key)
             for c in inspect(self).mapper.column_attrs
         }
+
+    def to_json(self):
+        owned = None
+        status = None
+        shelf_pos = None
+        if current_user.is_authenticated:
+            user_ol_book = current_user.get_user_ol_book(self.ol_id)
+            if user_ol_book:
+                owned = user_ol_book.owned
+                status = user_ol_book.status.name
+                shelf_pos = user_ol_book.shelf_pos
+        data = {
+            "ol_id": self.ol_id,
+            "title": self.title,
+            "author": self.author,
+            "thumbnail": self.thumbnail,
+            "description": self.description,
+            "shelf_pos": shelf_pos,
+            "owned": owned,
+            "status": status,
+            "published_date": self.published_year
+        }
+        return json.dumps(data, default=str)
+
+    def update_from_json(self, data: dict):
+        for key, value in data.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        return self

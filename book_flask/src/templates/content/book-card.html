@@ -1,4 +1,4 @@
-<div class="card mb-3 p-0" style="max-width: 350px;"
+<div class="card mb-3 p-0" style="max-width: 350px; max-height: 175px"
      role="button"
      data-bs-toggle="modal"
      data-bs-target="#bookModal"
@@ -8,14 +8,14 @@
             {% if v_book.thumbnail != None %}
                 <img src="{{ v_book.thumbnail}}" class="img-fluid rounded-start" style="max-height: 170px" alt="...">
             {% else %}
-                <img src="{{ url_for('static', filename='images/empty_cover.png') }}" class="card-img-top" alt="no-thumnail">
+                <img src="{{ url_for('static', filename='images/empty_cover.png') }}" style="max-height: 170px" class="card-img-top" alt="no-thumnail">
             {% endif %}
         </div>
         <div class="col-md-8">
             <div class="card-body">
                 <h5 class="card-title overflow-hidden" style="max-height: 50px">{{ v_book.title }}</h5>
-                <p class="card-text text-muted">By: {{ v_book.author }}</p>
-                <span class="badge rounded-pill bg-secondary mw-100">{{ v_book.categories }}</span>
+                <p class="card-text text-muted overflow-y-hidden" style="max-height: 50px">By: {{ v_book.author }}</p>
+{#                <span class="badge rounded-pill bg-secondary overflow-hidden" style="max-width: 100%">{{ v_book.categories }}</span>#}
             </div>
         </div>
     </div>

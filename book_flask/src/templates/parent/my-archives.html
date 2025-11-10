@@ -75,15 +75,43 @@
 
     {% include "content/book-modal.html" %}
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const accordion = document.getElementById('archivesAccordion');
+
+            accordion.addEventListener('show.bs.collapse', function (event) {
+                // Save the open panel ID in localStorage
+                localStorage.setItem('openAccordionId', event.target.id);
+            });
+
+            accordion.addEventListener('hide.bs.collapse', function (event) {
+                // Remove when it closes
+                const currentOpen = localStorage.getItem('openAccordionId');
+                if (currentOpen === event.target.id) {
+                    localStorage.removeItem('openAccordionId');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const openAccordionId = localStorage.getItem('openAccordionId');
+            if (openAccordionId) {
+                const element = document.getElementById(openAccordionId);
+                const collapse = new bootstrap.Collapse(element, { show: true });
+            }
+        });
+
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         const bookModal = document.getElementById('bookModal');
         bookModal.addEventListener('hidden.bs.modal', async function (e) {
-            console.log('bruh')
             await sleep(1000)
-            window.location.reload();
+            reload = bookModal.getAttribute('data-reload')
+            if (reload ==='true'){
+                bookModal.setAttribute('book-reload', null)
+                window.location.reload();
+            }
         });
     </script>
 

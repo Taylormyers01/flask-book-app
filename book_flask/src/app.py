@@ -12,11 +12,10 @@ from models.constants import BookStatus
 from routes.ol_book_routes import ol_book_bp
 from routes.test_routes import test_bp
 from routes.user_routes import user_bp
-from services.book_service import test_data, gen_home_stats
 from services.db import db
 from models.user import User
 from routes.auth_routes import auth_bp
-from routes.book_routes import book_bp
+from services.ol_book_service import gen_home_stats
 from utils.seed import Seeder
 
 app = Flask(__name__)
@@ -43,7 +42,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 app.register_blueprint(auth_bp)
-app.register_blueprint(book_bp)
 app.register_blueprint(test_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(ol_book_bp)
@@ -62,7 +60,7 @@ def home():
     if current_user.is_authenticated:
         all_books, authors, read_books = gen_home_stats(current_user)
         return render_template('parent/home.html',
-                               total_books=len(all_books), authors=len(authors), read_books=len(read_books), recent_books=test_data()[:4])
+                               total_books=len(all_books), authors=len(authors), read_books=len(read_books), recent_books=all_books[:4] if all_books else [])
     return render_template('parent/home.html',
                            total_books=0, authors=0, read_books=0, recent_books=[])
 
@@ -82,8 +80,8 @@ if __name__ == '__main__':
     with app.app_context():
         logger.info('Creating DB')
         db.create_all()
-        # seed = Seeder(db)
-        # seed.seed()
+        seed = Seeder(db)
+        seed.seed()
     logger.info('DB created successfully')
     run_flask()
     

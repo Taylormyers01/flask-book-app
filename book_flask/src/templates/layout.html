@@ -33,13 +33,13 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item {% if current_user.is_authenticated == false %}disabled{% endif %}"
-                               href="{{ url_for('book.my_archives') }}">My Archives</a></li>
+                               href="{{ url_for('ol_book.my_archives') }}">My Archives</a></li>
                         <li><a class="dropdown-item {% if current_user.is_authenticated == false %}disabled{% endif %}"
-                               href="{{ url_for('book.my_shelf') }}">My Shelf</a></li>
+                               href="{{ url_for('ol_book.my_shelf') }}">My Shelf</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" href="{{ url_for('book.search_catalog') }}">Search the Catalogs</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('ol_book.search_catalog') }}">Search the Catalogs</a></li>
                     </ul>
                 </li>
             </ul>

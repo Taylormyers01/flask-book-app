@@ -83,7 +83,7 @@ $(function () {
                     if (assigned === true) {
                         console.log("Re-parenting")
                         const book = $el.data("book")
-                        saveBookPosition(book.g_id, null)
+                        saveBookPosition(book.ol_id, null)
                         newParent.append($el)
                     } else if (orig.index >= orig.parent.children().length) {
                         orig.parent.append($el);
@@ -139,7 +139,7 @@ $(function () {
             const dropPosition = $drop.data("position")
             const book = ui.draggable.data("book")
             if (book.shelf_pos === null || book.shelf_pos !== dropPosition) {
-                if (saveBookPosition2(book.g_id, dropPosition) === false) {
+                if (saveBookPosition2(book.ol_id, dropPosition) === false) {
                     console.log('failed to save')
                     return
                 }
@@ -190,7 +190,7 @@ function autoPlaceBooks() {
             const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth() - $drag.outerWidth()) / 2;
 
             const dropPosition = $drop.data("position")
-            console.log(book.g_id, dropPosition)
+            console.log(book.ol_id, dropPosition)
             $drag.data({
                     "dropEle": $drop,
                     "assigned": assigned,
@@ -222,7 +222,7 @@ function setColors(){
 }
 
 
-function saveBookPosition(g_id, position) {
+function saveBookPosition(ol_id, position) {
 
     const output = fetch("/update-bookshelf-order", {
         method: "POST",
@@ -230,7 +230,7 @@ function saveBookPosition(g_id, position) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            g_id: g_id,
+            ol_id: ol_id,
             position: position
         }),
     })
@@ -252,7 +252,7 @@ function saveBookPosition(g_id, position) {
     return output;
 }
 
-async function saveBookPosition2(g_id, position) {
+async function saveBookPosition2(ol_id, position) {
     const url = "/update-bookshelf-order";
     try {
         const response = await fetch(url, {
@@ -261,7 +261,7 @@ async function saveBookPosition2(g_id, position) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                g_id: g_id,
+                ol_id: ol_id,
                 position: position
             })
         });

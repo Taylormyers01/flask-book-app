@@ -3,11 +3,10 @@ import random
 
 from werkzeug.security import generate_password_hash
 
-from models.book import Book
 from models.constants import BookStatus
+from models.ol_book import OlBook
 from models.user import User
-from models.user_book import UserBook
-from services.book_service import test_data
+from models.user_ol_book import UserOlBook
 
 
 class Seeder:
@@ -24,7 +23,7 @@ class Seeder:
             print("Seeding database with test data")
             self.clear_data()
             self.add_users()
-            self.add_books()
+            # self.add_books()
             self.db.session.commit()
             print("✅ Database seeded successfully!")
         else:
@@ -34,8 +33,8 @@ class Seeder:
     def clear_data(self):
         # Clear in reverse dependency order
         self.db.session.query(User).delete()
-        self.db.session.query(Book).delete()
-        self.db.session.query(UserBook).delete()
+        # self.db.session.query(OlBook).delete()
+        # self.db.session.query(UserOlBook).delete()
         self.db.session.commit()
         print("🗑️  Old data cleared.")
 
@@ -50,15 +49,16 @@ class Seeder:
         )
         print("👤 Users added.")
 
-    def add_books(self):
-        self.book_list = test_data()
-        for book in self.book_list:
-            u_book = UserBook(
-                owned=random.choice([True, False]),
-                status=random.choice([status for status in BookStatus]),
-                user=random.choice([self.user1, self.user2]),
-                book=book
-            )
-            self.db.session.add(u_book)
-        self.db.session.commit()
-        print("📚 Books added.")
+
+    # def add_books(self):
+    #     self.book_list =
+    #     for book in self.book_list:
+    #         u_book = UserBook(
+    #             owned=random.choice([True, False]),
+    #             status=random.choice([status for status in BookStatus]),
+    #             user=random.choice([self.user1, self.user2]),
+    #             book=book
+    #         )
+    #         self.db.session.add(u_book)
+    #     self.db.session.commit()
+    #     print("📚 Books added.")

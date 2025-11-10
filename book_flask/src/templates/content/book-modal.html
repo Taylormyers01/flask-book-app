@@ -36,10 +36,8 @@
                             <!-- Settings Tab -->
                             <div class="tab-pane fade show active" id="settings" role="tabpanel"
                                  aria-labelledby="settings-tab">
-{#                            {{ url_for('book.update_book', next=next) }}#}
                                 <form method="dialog" id="bookForm">
-                                    <input type="hidden" name="g_id" id="hiddenGid" value="">
-                                    <!-- Title & Author (read-only) -->
+                                    <input type="hidden" name="ol_id" id="hiddenOlid" value="">
                                     <div class="mb-3">
                                         <label class="form-label">Title</label>
                                         <input id="titleInput" type="text" class="form-control" value="" disabled readonly>
@@ -50,13 +48,12 @@
                                         <input id="authorInput" type="text" class="form-control" value="" disabled readonly>
                                     </div>
 
-                                    <!-- Status Dropdown -->
                                     <div class="mb-3">
                                         <label class="form-label">Status</label>
                                         <select class="form-select" name="status" id="statusInput">
                                             {% for status in BookStatus %}
                                                 <option value="{{ status.name }}">
-                                                    {{ status.name }}
+                                                    {{ status.value }}
                                                 </option>
                                             {% endfor %}
                                         </select>
@@ -65,14 +62,15 @@
                                     <!-- Owned Checkbox -->
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="checkbox" name="owned" id="ownedCheckbox"
-                                               value="True"
+                                               value="true"
                                         >
                                         <label class="form-check-label" for="ownedCheckbox">
                                             Owned
                                         </label>
                                     </div>
-{#                                    {%  if current_user.is_authenticated==false %} disabled {% endif %}#}
-                                    <button onclick="update_book();" class="btn btn-primary">Save</button>
+
+                                    <button {%  if current_user.is_authenticated==false %} disabled {% endif %}
+                                            onclick="update_ol_book();" class="btn btn-primary">Save</button>
                                 </form>
                             </div>
 
@@ -80,8 +78,7 @@
                             <div class="tab-pane fade" id="extra" role="tabpanel"
                                  aria-labelledby="extra-tab">
                                 <div class="mt-3 overflow-auto" style="max-height: 400px">
-                                    <strong>Description:</strong><p id="descriptionInput"></p>
-                                    <strong>Page Count:</strong><p id="pageCountInput"></p>
+                                    <strong>Description:</strong><pre id="descriptionInput" style="white-space: pre-wrap; word-wrap: break-word;"></pre>
                                     <strong>Published:</strong><p id="publishedInput"></p>
                                 </div>
                             </div>
@@ -101,37 +98,58 @@
             // Extract book data from card dataset
             const data = card.getAttribute('data-book');
             const book_data = JSON.parse(data)
+            bookModal.setAttribute('data-book', data)
+            console.log(book_data)
+
             // Populate modal
             document.getElementById('bookTitle').textContent = book_data.title;
-            document.getElementById('hiddenGid').value = book_data.g_id;
+            document.getElementById('hiddenOlid').value = book_data.ol_id;
             document.getElementById('titleInput').value = book_data.title;
             document.getElementById('authorInput').value = book_data.author;
             document.getElementById('statusInput').value = book_data.status;
 
-            if (book_data.owned === true){
-                document.getElementById('ownedCheckbox').checked = true
+            document.getElementById('ownedCheckbox').checked = book_data.owned;
+
+            if (book_data.thumbnail !== null){
+                document.getElementById('bookThumnail').src = book_data.thumbnail;
             }else{
-                document.getElementById('ownedCheckbox').checked = false
+                document.getElementById('bookThumnail').src = "{{ url_for('static', filename='images/empty_cover.png') }}"
             }
-            document.getElementById('bookThumnail').src = book_data.thumbnail;
             document.getElementById('descriptionInput').textContent = book_data.description;
-            document.getElementById('pageCountInput').textContent = book_data.page_count;
-            document.getElementById('publishedInput').textContent = book_data.publish_date;
+            document.getElementById('publishedInput').textContent = book_data.published_date;
         });
     });
 
-    function update_book(){
-        console.log('Updating book')
+    function update_ol_book(){
+        console.log('Updating Ol book')
         const bookForm = document.getElementById('bookForm');
+        let bookData = bookModal.getAttribute('data-book')
+        const book = JSON.parse(bookData)
+
         let formData = new FormData(bookForm);
-        fetch('/update-book', {
+
+        console.log(formData)
+        let owned = formData.get('owned')
+        let status = formData.get('status')
+
+        if(owned==null){
+            owned = false
+        }
+        book.owned = owned
+        book.status = status
+
+        fetch('/update-ol-book', {
             method: "POST",
-            body: formData
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(book)
         }).then(response =>{
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
             const bookModal = document.getElementById('bookModal');
+            bookModal.setAttribute('data-reload', 'true')
             const modalInstance = bootstrap.Modal.getInstance(bookModal);
             modalInstance.toggle();
             return response.json();

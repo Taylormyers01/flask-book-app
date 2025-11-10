@@ -116,7 +116,7 @@
 
                 <div id="book-stack" class="row text-center overflow-auto" style="margin-left: .25rem">
                     {% for book in books %}
-                        <div id="{{ book.g_id }}-drag"
+                        <div id="{{ book.ol_id }}-drag"
                              data-book="{{ book.to_json() }}"
                              class="draggable book book-horizontal book-bordered overflow-hidden test-1" style="margin-bottom: .25rem;}};">
                             <div class="book-title">{{ book.title }}</div>

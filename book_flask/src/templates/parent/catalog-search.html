@@ -29,7 +29,8 @@
             </div>
              `
             let query = document.getElementById("search-box").value;
-            fetch(`/update-catalog?q=${encodeURIComponent(query)}`)
+            {#fetch(`/update-catalog?q=${encodeURIComponent(query)}`)#}
+            fetch(`/ol-search?q=${encodeURIComponent(query)}`)
                 .then(response => response.text())
                 .then(html => {
                     $results.innerHTML = html;
