@@ -10,7 +10,6 @@ $(function () {
     const boardOffset = $board.offset();
     let displayedBook = null;
 
-
     // Make them draggable
     $(".draggable").draggable({
         containment: "#board",
@@ -20,29 +19,26 @@ $(function () {
         helper: "clone", // ensures we drag the same element, but keep mouse alignment right
         cursorAt: {top: 75, left: 25},
 
-
         start: function (event, ui) {
             const $el = $(this);
-
             // Record original position for reset
             $el.data("origPosition", {
                 parent: $el.parent(),
                 index: $el.index()
             });
 
-
             // Switch to absolute positioning relative to board
             $el.appendTo($board).css({
                 position: "absolute",
                 width: "50px",
                 height: "150px",
-                // "z-index": 1000,
                 cursor: "grab",
                 "text-align": "center",
                 "writing-mode": "vertical-rl",
                 margin: "unset",
                 opacity: 0
             });
+
             const off = $el.offset();
             // Fix the misalignment by updating draggable's internal offset
             ui.helper.css({
@@ -71,19 +67,16 @@ $(function () {
                         "z-index": "",
                         cursor: "default",
                         "writing-mode": "horizontal-tb",
-                        // "margin-bottom": ".25rem",
                         opacity: 1
                     });
-
                     $el.removeClass("book-vertical").addClass("book-horizontal");
 
                     const assigned = $el.data("assigned")
-                    console.log("assigned: ", assigned)
                     var newParent = $("#book-stack");
                     if (assigned === true) {
                         console.log("Re-parenting")
                         const book = $el.data("book")
-                        saveBookPosition(book.ol_id, null)
+                        saveBookPosition2(book.ol_id, null)
                         newParent.append($el)
                     } else if (orig.index >= orig.parent.children().length) {
                         orig.parent.append($el);
@@ -122,7 +115,6 @@ $(function () {
             $("#bookImg").hide();
         }
         bookView.show()
-
     });
 
 
@@ -173,7 +165,7 @@ function autoPlaceBooks() {
         const book = $drag.data("book")
         const assigned = book.shelf_pos != null
 
-        // Example: check flag stored in data attribute
+        // Check flag stored in data attribute
         if (assigned === true) {
             const off = $drag.offset();
 
@@ -189,17 +181,13 @@ function autoPlaceBooks() {
             const targetTop = dropOff.top - boardOffset.top + ($drop.outerHeight() - $drag.outerHeight()) / 2;
             const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth() - $drag.outerWidth()) / 2;
 
-            const dropPosition = $drop.data("position")
-            console.log(book.ol_id, dropPosition)
             $drag.data({
                     "dropEle": $drop,
                     "assigned": assigned,
                     "dropSuccess": false
                 }
             )
-
             $drag.animate({top: targetTop, left: targetLeft}, 800);
-
             $drag.appendTo($drop)
             $drag.css({
                 position: "sticky",
@@ -210,6 +198,7 @@ function autoPlaceBooks() {
     });
 }
 
+// Set book spine colors based off of status
 function setColors(){
     $(".draggable").each(function () {
         const $drag = $(this);
@@ -221,37 +210,7 @@ function setColors(){
     });
 }
 
-
-function saveBookPosition(ol_id, position) {
-
-    const output = fetch("/update-bookshelf-order", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            ol_id: ol_id,
-            position: position
-        }),
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Error while saving book position");
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Position saved:", data);
-            return true;
-        })
-        .catch(error => {
-            console.error("Error saving position:", error);
-            return false;
-        });
-    console.log("saved: ", output)
-    return output;
-}
-
+// Update book position in DB
 async function saveBookPosition2(ol_id, position) {
     const url = "/update-bookshelf-order";
     try {

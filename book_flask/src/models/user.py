@@ -9,7 +9,6 @@ class User(UserMixin, db.Model):
     id = Column(db.Integer, primary_key=True)
     username = Column(db.String(80), unique=True, nullable=False)
     password_hash = Column(db.String(128), nullable=False)
-    # user_books = db.relationship("UserBook", back_populates="user", cascade="all, delete-orphan")
     user_ol_books = db.relationship("UserOlBook", back_populates="user", cascade="all, delete-orphan")
 
     def set_password(self, password):
@@ -18,21 +17,29 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    # def get_book(self, g_id):
-    #     return next((ub.book for ub in self.user_books if ub.book.g_id == g_id), None)
-    #
-    # def get_book_by_position(self, position):
-    #     return next((ub for ub in self.user_books if ub.shelf_pos == position), None)
-    #
-    # def get_user_book(self, g_id):
-    #     return next((ub for ub in self.user_books if ub.book.g_id == g_id), None)
-
-
     def get_ol_book(self, ol_id):
-            return next((uolb.ol_book for uolb in self.user_ol_books if uolb.book.ol_id == ol_id), None)
+        """
+        Get book by ol_id
+
+        :param ol_id: OpenLibrary identifier
+        :return: OlBook
+        """
+        return next((uolb.ol_book for uolb in self.user_ol_books if uolb.book.ol_id == ol_id), None)
 
     def get_ol_book_by_position(self, position):
+        """
+        Get book by position on the shelf
+
+        :param position: shelf position
+        :return: OlBook
+        """
         return next((uolb for uolb in self.user_ol_books if uolb.shelf_pos == position), None)
 
     def get_user_ol_book(self, ol_id):
+        """
+        Get UserOlBook relationship object
+
+        :param ol_id: OpenLibrary identifier
+        :return: UserOlBook
+        """
         return next((uolb for uolb in self.user_ol_books if uolb.ol_book.ol_id == ol_id), None)

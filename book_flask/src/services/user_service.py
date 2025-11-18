@@ -3,7 +3,7 @@ from logger import logger
 from services.db import db
 from models.user import User
 
-
+# TODO remove
 def get_user_by_name(name: str):
     users = []
     if name:

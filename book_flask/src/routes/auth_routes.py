@@ -9,6 +9,7 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """Generic login request form"""
     data = request.json
     username = data.get('username', None)
     password = data.get('password', None)
@@ -24,6 +25,7 @@ def login():
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    """Generic user registration, redirects to home page"""
     if request.method == 'POST':
         try:
             data = request.json
@@ -41,5 +43,6 @@ def register():
 @auth_bp.route('/logout')
 @login_required
 def logout():
+    """Generic logout, redirects to home page"""
     logout_user()
     return redirect(url_for('home'))

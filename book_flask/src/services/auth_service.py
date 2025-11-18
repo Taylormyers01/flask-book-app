@@ -6,10 +6,11 @@ from logger import logger
 import json
 
 def register_user(username, password):
+    """Creates user if username and password are supplied"""
     if username is None or password is None:
         return None
     reg_user = User()
-    logger.info(f"Registering user: {username}")
+    logger.info(f'Registering user: {username}')
     reg_user.username = username
     reg_user.set_password(password)
     db.session.add(reg_user)
@@ -17,11 +18,13 @@ def register_user(username, password):
     return reg_user
 
 def authenticate_user(username, password):
+    """Attempts to authenticate user, returns None if invalid"""
     auth_user = User.query.filter_by(username=username).first()
     if auth_user and auth_user.check_password(password):
         return auth_user
     return None
 
 def refresh_user(current_user):
+    """Forces refresh of logged-in user"""
     user = User.query.get(current_user.id)
     login_user(user)

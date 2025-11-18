@@ -1,3 +1,4 @@
+import json
 import os
 import random
 
@@ -23,7 +24,7 @@ class Seeder:
             print("Seeding database with test data")
             self.clear_data()
             self.add_users()
-            # self.add_books()
+            self.add_books()
             self.db.session.commit()
             print("✅ Database seeded successfully!")
         else:
@@ -33,8 +34,8 @@ class Seeder:
     def clear_data(self):
         # Clear in reverse dependency order
         self.db.session.query(User).delete()
-        # self.db.session.query(OlBook).delete()
-        # self.db.session.query(UserOlBook).delete()
+        self.db.session.query(OlBook).delete()
+        self.db.session.query(UserOlBook).delete()
         self.db.session.commit()
         print("🗑️  Old data cleared.")
 
@@ -50,15 +51,18 @@ class Seeder:
         print("👤 Users added.")
 
 
-    # def add_books(self):
-    #     self.book_list =
-    #     for book in self.book_list:
-    #         u_book = UserBook(
-    #             owned=random.choice([True, False]),
-    #             status=random.choice([status for status in BookStatus]),
-    #             user=random.choice([self.user1, self.user2]),
-    #             book=book
-    #         )
-    #         self.db.session.add(u_book)
-    #     self.db.session.commit()
-    #     print("📚 Books added.")
+    def add_books(self):
+        with open("utils/resources/sample_books.json", "r") as file:
+            data = json.load(file)
+
+        self.book_list = [OlBook(**item) for item in data]
+        for book in self.book_list:
+            u_ol_book = UserOlBook(
+                owned=random.choice([True, False]),
+                status=random.choice([status for status in BookStatus]),
+                user=random.choice([self.user1, self.user2]),
+                ol_book=book
+            )
+            self.db.session.add(u_ol_book)
+        self.db.session.commit()
+        print("📚 Books added.")

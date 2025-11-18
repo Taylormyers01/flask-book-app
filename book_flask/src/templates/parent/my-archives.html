@@ -71,10 +71,33 @@
             </div>
         </div>
 
+        <h2 class="accordion-header" id="reading-headingOne">
+            <button class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#reading"
+                    aria-expanded="true"
+                    aria-controls="reading-collapseOne"
+            >
+                Want To Read Books
+            </button>
+        </h2>
+        <div id="wantToRead"
+             class="accordion-collapse collapse"
+             aria-labelledby="reading-headingOne"
+             data-bs-parent="#archivesAccordion">
+            <div class="accordion-body">
+                {% with books=reading_books %}
+                    {% include "layout/book-grid.html" %}
+                {% endwith %}
+            </div>
+        </div>
+
     </div>
 
     {% include "content/book-modal.html" %}
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
             const accordion = document.getElementById('archivesAccordion');
 
@@ -92,6 +115,7 @@
             });
         });
 
+        // Open the most recently opened accordion
         document.addEventListener('DOMContentLoaded', function () {
             const openAccordionId = localStorage.getItem('openAccordionId');
             if (openAccordionId) {
@@ -106,8 +130,9 @@
 
         const bookModal = document.getElementById('bookModal');
         bookModal.addEventListener('hidden.bs.modal', async function (e) {
-            await sleep(1000)
+            await sleep(1000) // allows time for backend update
             reload = bookModal.getAttribute('data-reload')
+            // force reload to update content
             if (reload ==='true'){
                 bookModal.setAttribute('book-reload', null)
                 window.location.reload();

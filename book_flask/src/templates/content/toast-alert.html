@@ -35,7 +35,7 @@
         });
     });
 
-    // ✅ Create and show a toast dynamically
+    // Create and show a toast dynamically
     function showToast(message, category = 'info') {
         const toastContainer = document.getElementById('toastContainer');
         // Create toast element
@@ -56,10 +56,9 @@
         // Append and show
         toastContainer.appendChild(toastEl);
         const toast = new bootstrap.Toast(toastEl);
-        // { delay: 4000 }
         toast.show();
 
-        // Remove from DOM after hidden
+        // Remove after hidden
         toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
     }
 </script>

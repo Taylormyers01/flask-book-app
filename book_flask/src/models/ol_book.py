@@ -11,7 +11,7 @@ class OlBook(db.Model):
     __tablename__ = "ol_books"
     id = Column(db.Integer, primary_key=True)
 
-    # Data from Google Book API
+    # Data from OpenLibrary Book API
     ol_id = Column(db.String(50), nullable=False)
     title = Column(db.String(100), nullable=False)
     author = Column(db.String(100), nullable=False)
@@ -23,11 +23,13 @@ class OlBook(db.Model):
     # Relationship with user specific data
     user_ol_books = relationship("UserOlBook", back_populates="ol_book", cascade="all, delete-orphan")
 
+
     def __repr__(self):
         return {
             c.key: getattr(self, c.key)
             for c in inspect(self).mapper.column_attrs
         }
+
 
     def to_dict(self):
         return {
@@ -35,7 +37,9 @@ class OlBook(db.Model):
             for c in inspect(self).mapper.column_attrs
         }
 
+
     def to_json(self):
+        """Used by frontend to get book data -> tries to fetch user_ol_book fields if present"""
         owned = None
         status = None
         shelf_pos = None
@@ -58,8 +62,12 @@ class OlBook(db.Model):
         }
         return json.dumps(data, default=str)
 
+
     def update_from_json(self, data: dict):
+        """Simple update object using dict"""
         for key, value in data.items():
             if hasattr(self, key):
+                if isinstance(value, list) and key == 'categories':
+                    value = ','.join(val for val in value)
                 setattr(self, key, value)
         return self

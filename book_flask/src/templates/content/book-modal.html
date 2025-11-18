@@ -93,13 +93,12 @@
     document.addEventListener('DOMContentLoaded', () => {
         const bookModal = document.getElementById('bookModal');
 
+        // Extracts data from card to populate the Modal
         bookModal.addEventListener('show.bs.modal', event => {
             const card = event.relatedTarget; // The card that triggered the modal
-            // Extract book data from card dataset
             const data = card.getAttribute('data-book');
             const book_data = JSON.parse(data)
             bookModal.setAttribute('data-book', data)
-            console.log(book_data)
 
             // Populate modal
             document.getElementById('bookTitle').textContent = book_data.title;
@@ -113,6 +112,7 @@
             if (book_data.thumbnail !== null){
                 document.getElementById('bookThumnail').src = book_data.thumbnail;
             }else{
+                // Uses default thumbnail if cover is not found
                 document.getElementById('bookThumnail').src = "{{ url_for('static', filename='images/empty_cover.png') }}"
             }
             document.getElementById('descriptionInput').textContent = book_data.description;
@@ -120,8 +120,8 @@
         });
     });
 
+    // Update book with form data
     function update_ol_book(){
-        console.log('Updating Ol book')
         const bookForm = document.getElementById('bookForm');
         let bookData = bookModal.getAttribute('data-book')
         const book = JSON.parse(bookData)
