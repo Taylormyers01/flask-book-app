@@ -17,7 +17,7 @@ def ol_search():
     title = request.args.get("title", None)
     author = request.args.get("author", None)
     q = request.args.get("q", None)
-    books = search_books(title, author, q, 2)
+    books = search_books(title, author, q, 20)
     return render_template("layout/book-grid.html", books=books)
 
 

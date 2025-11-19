@@ -15,6 +15,8 @@ cp dist/app ../flask_server/
 
 
 ```bash
+rmdir ./out/
+
 cd book_flask/src
 
 pip install pyinstaller

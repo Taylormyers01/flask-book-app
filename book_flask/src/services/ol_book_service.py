@@ -53,7 +53,7 @@ def fetch_book_details_sync(doc):
             else None
         )
         if cover_url is None:
-            cover_url = doc.get('cover', {})['medium']
+            cover_url = doc.get('cover', {'medium': None})['medium']
 
         return create_ol_book(doc, details, cover_url, work_key)
 

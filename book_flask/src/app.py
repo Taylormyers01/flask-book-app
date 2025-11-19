@@ -1,9 +1,12 @@
 import os
+from pathlib import Path
 
 from flask import Flask, redirect, render_template, url_for
 from flask_bootstrap import Bootstrap5
 from flask_cors import CORS
 from flask_login import LoginManager, current_user
+from platformdirs import user_data_dir
+
 from logger import logger
 from dotenv import load_dotenv
 from waitress import serve
@@ -18,6 +21,9 @@ from routes.auth_routes import auth_bp
 from services.ol_book_service import gen_home_stats
 from utils.seed import Seeder
 
+APP_NAME = "Book-Flask"
+APP_AUTHOR = "TM"
+
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 bootstrap = Bootstrap5(app)
@@ -25,10 +31,18 @@ CORS(app)
 logger.info("Flask app starting...")
 logger.info(f"App root directory: {basedir}")
 
+
+# Get correct OS-specific user data directory
+data_dir = Path(user_data_dir(appname=APP_NAME, appauthor=APP_AUTHOR))
+data_dir.mkdir(parents=True, exist_ok=True)
+db_path = data_dir / "database.db"
+
 # Config
 app.secret_key = "super-secret"  # Load from env in production
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+logger.info("Using SQLite DB at:", db_path)
 
 db.init_app(app)
 
@@ -40,6 +54,11 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.commit()
+    db.session.remove()
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(test_bp)

@@ -39,7 +39,7 @@ $(function () {
                 opacity: 0
             });
 
-            const off = $el.offset();
+            // const off = $el.offset();
             // Fix the misalignment by updating draggable's internal offset
             ui.helper.css({
                 width: "50px",
@@ -124,9 +124,9 @@ $(function () {
         hoverClass: "highlight",
         drop: function (event, ui) {
             const $drop = $(this);
-            const dropOff = $drop.offset(); // doc coords
-            const targetTop = dropOff.top - boardOffset.top + ($drop.outerHeight() - ui.draggable.outerHeight()) / 2;
-            const targetLeft = dropOff.left - boardOffset.left + ($drop.outerWidth() - ui.draggable.outerWidth()) / 2;
+            const dropPos = $drop.position(); // doc coords
+            const targetTop = dropPos.top + ($drop.outerHeight() - ui.draggable.outerHeight()) / 2;
+            const targetLeft = dropPos.left + ($drop.outerWidth() - ui.draggable.outerWidth()) / 2;
 
             const dropPosition = $drop.data("position")
             const book = ui.draggable.data("book")
@@ -141,15 +141,14 @@ $(function () {
                     "dropEle": $drop,
                     "assigned": true
                 }
-            ).data("dropEle", $drop).data();
+            ).data("dropEle", $drop);
 
             ui.draggable.animate({top: targetTop, left: targetLeft}, 200, function () {
                 ui.draggable.css({
                     cursor: "default",
-                    opacity: 1,
+                    opacity: 1
                 });
             });
-
         }
     })
     autoPlaceBooks();

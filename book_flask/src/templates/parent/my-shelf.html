@@ -114,7 +114,7 @@
                     </div>
                 </div>
 
-                <div id="book-stack" class="row text-center overflow-auto" style="margin-left: .25rem">
+                <div id="book-stack" class="row text-center overflow-auto" style="margin-left: .25rem; min-height: 200px">
                     {% for book in books %}
                         <div id="{{ book.ol_id }}-drag"
                              data-book="{{ book.to_json() }}"
@@ -132,7 +132,7 @@
 
 {% block scripts %}
     {{ super() }}
-    <script src="{{ url_for('static', filename='js/bookDragScripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bookDragScripts2.js') }}"></script>
 {% endblock %}
 
 

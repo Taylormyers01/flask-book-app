@@ -17,14 +17,17 @@ function createWindow() {
 
   mainWindow.loadURL('http://127.0.0.1:5000/');
   mainWindow.on('closed', () => {
-    mainWindow = null;
     if (pythonProcess) pythonProcess.kill();
   });
 }
 
 function startPythonServer() {
-  const script = path.join(__dirname, 'flask_server', 'app');
-  pythonProcess = spawn(script);
+  const backendPath = process.platform === "win32"
+      ? path.join(__dirname, "/book_flask/src/dist/app.exe")
+      : path.join(__dirname, "/book_flask/src/dist/app");
+  // const script = path.join(__dirname, 'flask_server', 'app');
+  pythonProcess = spawn(backendPath);
+  // pythonProcess = spawn('python3', [backendPath]);
 
   pythonProcess.stdout.on('data', (data) => {
     const msg = data.toString();
@@ -46,12 +49,17 @@ function startPythonServer() {
   pythonProcess.on('close', (code) => {
     console.log(`Python server exited with code ${code}`);
   });
+
 }
 
 app.whenReady().then(startPythonServer);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  app.quit();
+});
+
+app.on('before-quit', () => {
+  if (pythonProcess) pythonProcess.kill('SIGINT');
 });
 
 app.on('quit', () => {
