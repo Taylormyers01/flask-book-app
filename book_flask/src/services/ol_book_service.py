@@ -25,58 +25,76 @@ def fetch_book_details(work_key):
 
 def fetch_book_details_sync(doc):
     """Async function to pull book details"""
-    from app import app
-    with app.app_context():
-        # Example key /works/OL8894965W
-        work_key = doc.get("key").split('/')[-1]
-        if not work_key:
-            return
+    try:
+        from app import app
+        with app.app_context():
+            # Example key /works/OL8894965W
+            work_key = doc.get("key").split('/')[-1]
+            if not work_key:
+                return
 
-        # To avoid extra api calls -> checks if book exists in DB
-        ol_book = get_ol_book_if_exists(work_key)
-        if ol_book:
-            return ol_book
+            # To avoid extra api calls -> checks if book exists in DB
+            ol_book = get_ol_book_if_exists(work_key)
+            if ol_book:
+                return ol_book
 
-        # Fetch full details
-        details = fetch_book_details(work_key)
-
-        # I hate this, and I want to make it better -> abstraction bad?
-        if 'works' in details:
-            key = details.get('works')[0]['key']
-            work_key = key.split('/')[-1]
+            # Fetch full details
             details = fetch_book_details(work_key)
 
-        # https://covers.openlibrary.org/b/id/14658160-L.jpg
-        cover_url = (
-            f"https://covers.openlibrary.org/b/id/{doc['cover_i']}-M.jpg"
-            if "cover_i" in doc
-            else None
-        )
-        if cover_url is None:
-            cover_url = doc.get('cover', {'medium': None})['medium']
+            # I hate this, and I want to make it better -> abstraction bad?
+            if 'works' in details:
+                key = details.get('works')[0]
 
-        return create_ol_book(doc, details, cover_url, work_key)
+                if key != '' and isinstance(key, dict):
+                    key = key.get('key', '')
+                    work_key = key.split('/')[-1]
+                    details = fetch_book_details(work_key)
 
-def search_books(title=None, author=None, q=None, limit=20):
+            # https://covers.openlibrary.org/b/id/14658160-L.jpg
+            cover_url = (
+                f"https://covers.openlibrary.org/b/id/{doc['cover_i']}-M.jpg"
+                if "cover_i" in doc
+                else None
+            )
+            if cover_url is None:
+                cover_url = doc.get('cover', {'medium': None})['medium']
+
+            return create_ol_book(doc, details, cover_url, work_key)
+    except Exception as e:
+        logger.exception(f'Exception encountered while fetching book detaits for {doc} Exception {e}')
+
+def search_books(title=None, author=None, q=None, current_page=1, limit=20):
     """
     Entry point to fetch book data from OpenLibrary async
 
     /search.json returns minimal data, to get all required data points, you must
     fetch them via /works/{work_key} to build full book object
     """
-    params = {"limit": limit}
+    params = {"limit": limit, "page":current_page}
     if title: params["title"] = title
     if author: params["author"] = author
     if q: params["q"] = q
+
 
     res = requests.get(BASE_SEARCH, params=params)
     res.raise_for_status()
     data = res.json()
 
+    next_page = current_page
+    num_found = data.get('num_found', 1)
+    start = data.get('start', 0)
+    max_pages = int(num_found/limit)
+    if start < (num_found + limit):
+        next_page = current_page + 1
+    else:
+        next_page = None
+    logger.info(f'Found {num_found} books')
     futures = [pool.submit(fetch_book_details_sync, doc) for doc in data.get("docs", [])]
     results = [f.result() for f in as_completed(futures)]
 
-    return results
+    db.session.add_all(results)
+    db.session.commit()
+    return next_page, max_pages, results
 
 def create_ol_book(doc, details, cover_url, work_key):
     """Create OlBook from OpenLibrary api response"""
@@ -98,6 +116,9 @@ def create_ol_book(doc, details, cover_url, work_key):
     for key in ["first_publish_year", "publish_date"]:
         if key in doc:
             published_year = doc.get(key)
+    catagories = details.get("subjects", [])
+    if isinstance(catagories, list):
+        catagories = ','.join([cat for cat in catagories])
 
     return OlBook(
         ol_id=work_key,
@@ -106,7 +127,7 @@ def create_ol_book(doc, details, cover_url, work_key):
         thumbnail = cover_url,
         description = description,
         published_year = published_year,
-        categories = details.get("subjects", [])
+        categories = catagories
     )
 
 def get_books_by_isbn(isbns):

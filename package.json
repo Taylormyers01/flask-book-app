@@ -1,7 +1,10 @@
 {
-  "name": "my-book-app",
+  "name": "mybookapp",
+  "productName": "My Book App",
   "version": "1.0.0",
   "main": "main.js",
+  "author": "git_hub_taylormyers01",
+  "description": "Python flask-app",
   "scripts": {
     "start": "electron-forge start",
     "make": "electron-forge make",
@@ -20,16 +23,28 @@
   },
   "config": {
     "forge": {
+      "packagerConfig": {
+        "icon": "./assets/vecteezy/book-icon-pixel"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
-          "config": {}
+          "config": {
+            "name": "mybookapp",
+            "setupIcon": "./assets/vecteezy/book-icon-pixel.ico",
+            "iconUrl": "file://./assets/vecteezy/book-icon-pixel.ico",
+            "win32metadata": {
+              "CompanyName": "Taylor Myers",
+              "OriginalFilename": "MyBookApp.exe",
+              "ProductName": "My Book App",
+              "FileDescription": "My Book App Desktop Application",
+              "CreateDesktopShortcut": true
+            }
+          }
         },
         {
           "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
+          "platforms": ["darwin"]
         },
         {
           "name": "@electron-forge/maker-deb",

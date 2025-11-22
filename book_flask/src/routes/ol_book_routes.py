@@ -17,8 +17,14 @@ def ol_search():
     title = request.args.get("title", None)
     author = request.args.get("author", None)
     q = request.args.get("q", None)
-    books = search_books(title, author, q, 20)
-    return render_template("layout/book-grid.html", books=books)
+    page = request.args.get("page", 1)
+    next_page, max_pages, books = search_books(title, author, q, int(page))
+    return render_template(
+        "layout/book-grid.html",
+        books=books,
+        max_pages=max_pages,
+        next_page=next_page
+    )
 
 
 @login_required

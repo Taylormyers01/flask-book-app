@@ -1,161 +1,196 @@
-<!doctype html>
-{% extends "layout.html" %}
-{% block content %}
-    <div class="container" style="height: 100%">
-        <!-- Search/ISBN bar -->
-        <div class="row justify-content-start input-group mt-2">
-            <div class="col-4">
-                <input type="search" id="search-box" name="q" class="form-control" placeholder="Search...">
+    <!doctype html>
+    {% extends "layout.html" %}
+    {% block content %}
+        <div class="container" style="height: 100%">
+            <!-- Search/ISBN bar -->
+            <div class="row justify-content-start input-group mt-2">
+                <div class="col-4">
+                    <input type="search" id="search-box" name="q" class="form-control" placeholder="Search...">
+                </div>
+                <div class="col-4 p-0">
+                    <button class="btn btn-secondary" type="submit" id="search-btn">Search</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#isbnModal">
+                        <i class="bi bi-upc-scan"></i>
+                        <span class="fw-semibold">Scan</span>
+                    </button>
+                </div>
             </div>
-            <div class="col-4 p-0">
-                <button class="btn btn-secondary" type="submit" id="search-btn">Search</button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#isbnModal">
-                    <i class="bi bi-upc-scan"></i>
-                    <span class="fw-semibold">Scan</span>
-                </button>
+            <!-- Search Results -->
+            <div class="container bg-light overflow-y-auto mt-2"
+                 style="height: 86vh" id="results">
+                {% include 'layout/book-grid.html' %}
             </div>
-        </div>
-        <!-- Search Results -->
-        <div class="container bg-light overflow-y-auto mt-2"
-             style="height: 86vh" id="results">
-            {% include 'layout/book-grid.html' %}
-        </div>
-        {% include 'content/book-modal.html' %}
 
-        <!-- ISBN Modal -->
-        <div class="modal fade" id="isbnModal" tabindex="-1" aria-labelledby="isbnModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
+            {% include 'content/book-modal.html' %}
 
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="isbnModalLabel">Scan or Enter ISBNs</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+            <!-- ISBN Modal -->
+            <div class="modal fade" id="isbnModal" tabindex="-1" aria-labelledby="isbnModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
 
-                    <div class="modal-body">
-                        <!-- ISBN input -->
-                        <input type="text" id="isbnInput" class="form-control mb-3"
-                               placeholder="Scan or type ISBN and press Enter">
-
-                        <div id="isbnList" class="border rounded pt-0 pb-0 pl-1 pr-1 overflow-auto" style="max-height: 200px;">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="isbnModalLabel">Scan or Enter ISBNs</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                    </div>
 
-                    <div class="modal-footer d-flex justify-content-between border-top pt-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="ownedCheckbox" value="true"
-                                   {% if current_user.is_authenticated == false %}disabled{% endif %}>
-                            <label class="form-check-label" for="ownedCheckbox">Owned?</label>
-                        </div>
-                        <div class="btn-group" role="group">
-                            <button id="searchIsbnBtn" class="btn btn-outline-primary">Search ISBNs</button>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
+                        <div class="modal-body">
+                            <!-- ISBN input -->
+                            <input type="text" id="isbnInput" class="form-control mb-3"
+                                   placeholder="Scan or type ISBN and press Enter">
 
+                            <div id="isbnList" class="border rounded pt-0 pb-0 pl-1 pr-1 overflow-auto" style="max-height: 200px;">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer d-flex justify-content-between border-top pt-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="ownedCheckbox" value="true"
+                                       {% if current_user.is_authenticated == false %}disabled{% endif %}>
+                                <label class="form-check-label" for="ownedCheckbox">Owned?</label>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button id="searchIsbnBtn" class="btn btn-outline-primary">Search ISBNs</button>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        // Update results inner html based off of search query. Show loading while searching
-        document.getElementById("search-btn").addEventListener("click", function () {
-            $results = document.getElementById("results")
-            $results.innerHTML = `
-             <div class="d-flex h-100 justify-content-center align-items-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-             `
-            let query = document.getElementById("search-box").value;
-            fetch(`/ol-search?q=${encodeURIComponent(query)}`)
-                .then(response => response.text())
-                .then(html => {
-                    $results.innerHTML = html;
-                });
-        });
-
-        document.getElementById("search-box").addEventListener("keyup", function (e) {
-            if (e.key === "Enter") document.getElementById("search-btn").click();
-        });
-
-
-        // ISBN search config
-        const isbnInput = document.getElementById('isbnInput');
-        const isbnList = document.getElementById('isbnList');
-        const sendButton = document.getElementById('searchIsbnBtn');
-        let isbnArray = [];
-
-        isbnInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const value = isbnInput.value.trim();
-                if (value && !isbnArray.includes(value)) {
-                    addIsbn(value);
-                }
-                isbnInput.value = '';
-            }
-        });
-
-        function addIsbn(isbn) {
-            isbnArray.push(isbn);
-
-            // Create element
-            const item = document.createElement('div');
-            item.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'border-bottom', 'p-1');
-            item.innerHTML = `
-      <span>${isbn}</span>
-      <button class="btn btn-sm btn-outline-danger">&times;</button>
-    `;
-
-            // Remove on click
-            item.querySelector('button').addEventListener('click', () => {
-                isbnArray = isbnArray.filter(i => i !== isbn);
-                item.remove();
+        <script>
+            let searchTerm = ""
+            // Update results inner html based off of search query. Show loading while searching
+            document.getElementById("search-btn").addEventListener("click", function () {
+                searchTerm = document.getElementById("search-box").value;
+                loadAndSearch(1);
             });
 
-            isbnList.appendChild(item);
-        }
-
-        // Send all ISBNs via GET
-        sendButton.addEventListener('click', () => {
-            $results = document.getElementById("results")
-            $owned = document.getElementById("ownedCheckbox")
-            $results.innerHTML = `
-             <div class="d-flex h-100 justify-content-center align-items-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
+            function loadAndSearch(page) {
+                setPageInUrl(page);
+                $results = document.getElementById("results")
+                $results.innerHTML = `
+                 <div class="d-flex h-100 justify-content-center align-items-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
                 </div>
-            </div>
-             `
-            if (isbnArray.length === 0) {
-                showToast('No ISBNs added!');
-                return;
+                 `
+                fetch(`/ol-search?q=${encodeURIComponent(searchTerm)}&page=${encodeURIComponent(page)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        $results.innerHTML = html;
+                    });
+
+                document.getElementById("search-box").addEventListener("keyup", function (e) {
+                    if (e.key === "Enter") document.getElementById("search-btn").click();
+                });
             }
 
-            console.log($owned.value)
-            const isbnModal = document.getElementById('isbnModal');
-            const isbnInstance = bootstrap.Modal.getInstance(isbnModal);
+            function loadAndSearchMore(books, page) {
+                setPageInUrl(page);
+                $results = document.getElementById("results")
+                $results.innerHTML = `
+                 <div class="d-flex h-100 justify-content-center align-items-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                 `
+                fetch(`/ol-search?q=${encodeURIComponent(searchTerm)}&page=${encodeURIComponent(page)}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        $results.innerHTML = html;
+                    });
 
-            const query = isbnArray.map(i => `isbn=${encodeURIComponent(i)}`).join('&');
-            const url = `/isbn-search?${query}&owned=${$owned}`;
-            console.log('Sending GET to:', url);
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error('Request failed');
-                    return response.text();
-                })
-                .then(data => {
-                    $results.innerHTML = data
-                    isbnInstance.toggle();
-                })
-                .catch(err => {
-                    console.error(err);
-                    showToast('Error sending ISBNs.');
+                document.getElementById("search-box").addEventListener("keyup", function (e) {
+                    if (e.key === "Enter") document.getElementById("search-btn").click();
                 });
-        });
-    </script>
-{% endblock %}
+            }
+
+            function setPageInUrl(pageNumber) {
+                const url = new URL(window.location);
+                url.searchParams.set("page", pageNumber);
+
+                // Update URL without reload
+                window.history.pushState({}, "", url);
+            }
+
+            // ISBN search config
+            const isbnInput = document.getElementById('isbnInput');
+            const isbnList = document.getElementById('isbnList');
+            const sendButton = document.getElementById('searchIsbnBtn');
+            let isbnArray = [];
+
+            isbnInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const value = isbnInput.value.trim();
+                    if (value && !isbnArray.includes(value)) {
+                        addIsbn(value);
+                    }
+                    isbnInput.value = '';
+                }
+            });
+
+            function addIsbn(isbn) {
+                isbnArray.push(isbn);
+
+                // Create element
+                const item = document.createElement('div');
+                item.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'border-bottom', 'p-1');
+                item.innerHTML = `
+          <span>${isbn}</span>
+          <button class="btn btn-sm btn-outline-danger">&times;</button>
+        `;
+
+                // Remove on click
+                item.querySelector('button').addEventListener('click', () => {
+                    isbnArray = isbnArray.filter(i => i !== isbn);
+                    item.remove();
+                });
+
+                isbnList.appendChild(item);
+            }
+
+            // Send all ISBNs via GET
+            sendButton.addEventListener('click', () => {
+                $results = document.getElementById("results")
+                $owned = document.getElementById("ownedCheckbox")
+                $results.innerHTML = `
+                 <div class="d-flex h-100 justify-content-center align-items-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                 `
+                if (isbnArray.length === 0) {
+                    showToast('No ISBNs added!');
+                    return;
+                }
+
+                console.log($owned.value)
+                const isbnModal = document.getElementById('isbnModal');
+                const isbnInstance = bootstrap.Modal.getInstance(isbnModal);
+
+                const query = isbnArray.map(i => `isbn=${encodeURIComponent(i)}`).join('&');
+                const url = `/isbn-search?${query}&owned=${$owned}`;
+                console.log('Sending GET to:', url);
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.text();
+                    })
+                    .then(data => {
+                        $results.innerHTML = data
+                        isbnInstance.toggle();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast('Error sending ISBNs.');
+                    });
+            });
+        </script>
+    {% endblock %}

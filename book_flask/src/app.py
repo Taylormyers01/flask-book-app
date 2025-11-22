@@ -42,7 +42,7 @@ app.secret_key = "super-secret"  # Load from env in production
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-logger.info("Using SQLite DB at:", db_path)
+logger.info(f"Using SQLite DB at: {db_path}")
 
 db.init_app(app)
 
@@ -55,10 +55,10 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db.session.commit()
-    db.session.remove()
+# @app.teardown_appcontext
+# def shutdown_session(exception=None):
+#     db.session.commit()
+#     db.session.remove()
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(test_bp)

@@ -1,8 +1,55 @@
-<div class="row gap-2">
-    {% if books is none %}
-        <h1>No books found</h1>
+<style>
+    /* For the active page link */
+    .page-item.active .page-link {
+        background-color: var(--bs-secondary) !important; /* Use Bootstrap's secondary color variable */
+        border-color: var(--bs-secondary) !important;
+        color: var(--bs-white) !important; /* Adjust text color for contrast */
+    }
+
+    /* For regular page links */
+    .page-link {
+        color: var(--bs-secondary); /* Set link color to secondary */
+    }
+
+    .page-link:hover {
+        color: var(--bs-white); /* Adjust hover color for contrast */
+        background-color: var(--bs-secondary);
+        border-color: var(--bs-secondary);
+    }
+
+</style>
+<div class="d-flex flex-column" style="height: 100%;">
+
+    <!-- Scrollable Books Section -->
+    <div class="flex-grow-1 overflow-auto overflow-x-hidden">
+        <div class="row g-2">
+            {% if books is none %}
+                <h1>No books found</h1>
+            {% else %}
+                {% for v_book in books %}
+                    {% include "content/book-card.html" %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination Section -->
+    {% if next_page is defined %}
+        <div class="d-flex justify-content-center py-2">
+            <nav>
+                <ul class="pagination mb-0">
+                    {% for p in range(next_page - 3, next_page + 2) %}
+                        {% if 1 <= p < max_pages %}
+                            <li class="page-item {% if p == next_page - 1 %}active{% endif %}">
+                                <a class="page-link" href="#" onclick="loadAndSearch({{ p }})">
+                                    {{ p }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
     {% endif %}
-    {% for v_book in books %}
-        {% include "content/book-card.html" %}
-    {% endfor %}
+
 </div>
