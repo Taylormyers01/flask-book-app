@@ -1,72 +1,151 @@
+{#{% extends "layout.html" %}#}
+{#{% block title %}Book Flask | Home{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#    <div class="container my-5">#}
+{##}
+{#        <!-- Hero Section -->#}
+{#        <div class="text-center mb-5">#}
+{#            <h1 class="display-4 fw-bold">📚 Welcome to Book Flask</h1>#}
+{#            <p class="lead">Track your personal library, organize your books, and rediscover your collection.</p>#}
+{#        </div>#}
+{##}
+{#        <!-- Quick Stats -->#}
+{#        <div class="row text-center mb-5">#}
+{#            <div class="col-md-4">#}
+{#                <div class="card shadow-sm border-0 rounded-3">#}
+{#                    <div class="card-body">#}
+{#                        <h2 class="fw-bold">{{ total_books }}</h2>#}
+{#                        <p class="text-muted">Books in Library</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col-md-4">#}
+{#                <div class="card shadow-sm border-0 rounded-3">#}
+{#                    <div class="card-body">#}
+{#                        <h2 class="fw-bold">{{ authors }}</h2>#}
+{#                        <p class="text-muted">Unique Authors</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col-md-4">#}
+{#                <div class="card shadow-sm border-0 rounded-3">#}
+{#                    <div class="card-body">#}
+{#                        <h2 class="fw-bold">{{ read_books }}</h2>#}
+{#                        <p class="text-muted">Read Books</p>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <!-- Featured Books -->#}
+{#        <h2 class="text-center mb-4">📖 Recently Added</h2>#}
+{#        <div class="row">#}
+{#        {% if recent_books %}#}
+{#            {% for book in recent_books %}#}
+{#                <div class="col-md-3 mb-4">#}
+{#                    <div class="card h-100 shadow-sm border-0"#}
+{#                         data-book="{{ book.to_json() }}">#}
+{#                        <div class="card-body d-flex flex-column">#}
+{#                            <h5 class="card-title">{{ book.title }}</h5>#}
+{#                            <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>#}
+{#                            <p class="card-text small text-muted">{{ book.genre }}</p>#}
+{#                            <a href="" class="btn btn-outline-secondary mt-auto" data-bs-target="#bookModal">View</a>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            {% endfor %}#}
+{#        {% else %}#}
+{#            <p class="text-muted">No books yet. Start by adding your first one!</p>#}
+{#            </div>#}
+{#        {% endif %}#}
+{#    {% include 'content/book-modal.html' %}#}
+{##}
+{#    </div>#}
+{#{% endblock %}#}
 {% extends "layout.html" %}
 {% block title %}Book Flask | Home{% endblock %}
 
 {% block content %}
-    <div class="container my-5">
+    <div class="container py-5">
 
         <!-- Hero Section -->
         <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">📚 Welcome to Book Flask</h1>
-            <p class="lead">Track your personal library, organize your books, and rediscover your collection.</p>
-            <a href="" class="btn btn-secondary btn-lg mt-3">➕ Add a Book</a>
-{#            {{ url_for('add_book') }}#}
+            <h1 class="display-5 fw-bold">
+                <img src="{{ url_for('static', filename='images/book-icon-pixel.jpg') }}"
+                     alt="Book Icon"
+                     style="height: 1.3em; vertical-align: -0.25em; border-radius: 25px;">
+                Book Flask
+            </h1>
+            <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                A simple personal library app to track what you own, what you're reading,
+                and what you want to read — all powered by the OpenLibrary public API.
+            </p>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="row text-center mb-5">
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-3">
+        <!-- Stats Section -->
+        <div class="row g-4 mb-5 justify-content-center text-center">
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body">
                         <h2 class="fw-bold">{{ total_books }}</h2>
-                        <p class="text-muted">Books in Library</p>
+                        <p class="text-muted small mb-0">Books in Library</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-3">
+
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body">
                         <h2 class="fw-bold">{{ authors }}</h2>
-                        <p class="text-muted">Unique Authors</p>
+                        <p class="text-muted small mb-0">Unique Authors</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0 rounded-3">
+
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-body">
                         <h2 class="fw-bold">{{ read_books }}</h2>
-                        <p class="text-muted">Read Books</p>
+                        <p class="text-muted small mb-0">Read Books</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Featured Books -->
+        <!-- Recently Added -->
         <h2 class="text-center mb-4">📖 Recently Added</h2>
-        <div class="row">
+
         {% if recent_books %}
-            {% for book in recent_books %}
-                <div class="col-md-3 mb-4">
-                    <div class="card h-100 shadow-sm border-0"
-                         data-book="{{ book.to_json() }}">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ book.title }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>
-                            <p class="card-text small text-muted">{{ book.genre }}</p>
-                            <a href="" class="btn btn-outline-secondary mt-auto" data-bs-target="#bookModal">View</a>
+            <div class="row g-4 mb-5">
+                {% for book in recent_books %}
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title mb-1 fw-bold text-truncate">{{ book.title }}</h6>
+                                <p class="card-subtitle text-muted small mb-2 text-truncate">{{ book.author }}</p>
+
+                                {% if book.genre %}
+                                    <span class="badge bg-light text-dark mb-2">{{ book.genre }}</span>
+                                {% endif %}
+
+                                <button class="btn btn-outline-secondary btn-sm mt-auto"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#bookModal"
+                                        data-book="{{ book.to_json() }}">
+                                    View
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No books yet. Start by adding your first one!</p>
+                {% endfor %}
             </div>
+
+        {% else %}
+            <p class="text-muted text-center">No books yet — start adding your collection!</p>
         {% endif %}
 
-{#        <div class="text-center mt-5">#}
-{#            <p class="lead">✨ Ready to grow your library?</p>#}
-{#            <a href="" class="btn btn-success btn-lg">Start Adding Books</a>#}
-{#        </div>#}
-    {% include 'content/book-modal.html' %}
+        {% include "content/book-modal.html" %}
 
     </div>
 {% endblock %}

@@ -1,90 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     {% block head %}
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Book-Flask</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>{% block title %}Book-Flask{% endblock %}</title>
+
         {% block styles %}
             {{ bootstrap.load_css() }}
-            <!-- jQuery + jQuery UI (from CDN) -->
             <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+            <style>
+                body {
+                    background: #f2f2f2;
+                }
+                .navbar {
+                    max-height: 50px;
+                }
+                .content-wrapper {
+                    background: white;
+                }
+                .openlibrary-attrib a {
+                    text-decoration: none;
+                }
+                .body-wrapper {
+                    background: lightgrey;
+                }
+            </style>
         {% endblock %}
     {% endblock %}
 </head>
-<body class="color" style="background:lightgrey">
-<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light" style="max-height:50px">
+
+<body class="d-flex flex-column min-vh-100 body-wrapper">
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('home') }}">Book-Flask</a>
+
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='images/book-icon-pixel.jpg') }}"
+                 alt="Book Icon"
+                 style="height: 1.3em; vertical-align: -0.25em; border-radius: 25px;">
+            Book-Flask</a>
+
+        <!-- Mobile toggle -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+                data-bs-target="#navbarContent" aria-controls="navbarContent"
+                aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Left links -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link active" aria-current="page"
-                                        href="{{ url_for('home') }}">Home</a></li>
+                <li class="nav-item">
+                    <a class="nav-link{% if request.endpoint=='home' %} active{% endif %}"
+                       href="{{ url_for('home') }}">Home</a>
+                </li>
+
+                <!-- Archives Dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="archivesDropdown"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         The Archives
                     </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item {% if current_user.is_authenticated == false %}disabled{% endif %}"
-                               href="{{ url_for('ol_book.my_archives') }}">My Archives</a></li>
-                        <li><a class="dropdown-item {% if current_user.is_authenticated == false %}disabled{% endif %}"
-                               href="{{ url_for('ol_book.my_shelf') }}">My Shelf</a></li>
+                    <ul class="dropdown-menu" aria-labelledby="archivesDropdown">
                         <li>
-                            <hr class="dropdown-divider">
+                            <a class="dropdown-item {% if not current_user.is_authenticated %}disabled{% endif %}"
+                               href="{{ url_for('ol_book.my_archives') }}">My Archives</a>
                         </li>
-                        <li><a class="dropdown-item" href="{{ url_for('ol_book.search_catalog') }}">Search the Catalogs</a></li>
+                        <li>
+                            <a class="dropdown-item {% if not current_user.is_authenticated %}disabled{% endif %}"
+                               href="{{ url_for('ol_book.my_shelf') }}">My Shelf</a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('ol_book.search_catalog') }}">
+                                Search the Catalogs
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
+
+            <!-- Right side (User) -->
             <ul class="navbar-nav ms-auto">
+
                 {% if current_user.is_authenticated %}
-                <li class="align-self-end">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                       id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="{{ current_user.avatar_url or url_for('static', filename='default-avatar.png') }}"
-                             alt="avatar" width="32" height="32" class="rounded-circle me-2">
-                        {{ current_user.username }}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-{#                        <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>#}
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a>
-                        </li>
-                    </ul>
-                </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center"
+                           href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img src="{{ current_user.avatar_url or url_for('static', filename='default-avatar.png') }}"
+                                 alt="avatar" width="32" height="32"
+                                 class="rounded-circle me-2">
+                            {{ current_user.username }}
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+
                 {% else %}
-                <!-- Login Link -->
-                <li class="align-self-end">
-                    <a class="nav-link" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
-                </li>
+                    <li>
+                        <a class="nav-link" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+                    </li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
-<div class="container-lg" style="background: white; padding-top: 3rem;">
-    {% block content %}{% endblock %}
-    {% include 'content/toast-alert.html'%}
+
+<!-- Push content below navbar -->
+<div class="mt-5 pt-3 flex-grow-1 body-wrapper">
+    <div class="container-lg content-wrapper py-3">
+        {% block content %}{% endblock %}
+    </div>
+    <!-- Footer stays at bottom -->
+    <footer class="text-center mt-auto py-2">
+        <p class="small text-muted mb-1">
+            This project uses the <a href="https://openlibrary.org" target="_blank">OpenLibrary API</a>.
+            Consider <a href="https://archive.org/donate/" target="_blank">supporting their mission</a> ❤️
+        </p>
+    </footer>
 </div>
+
+</body>
+
 {% include 'content/login.html' %}
+
 {% block scripts %}
-    <!-- jQuery must come before jQuery UI -->
+    <!-- jQuery + UI -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
-    <!-- Bootstrap’s JS (from bootstrap-flask) -->
+    <!-- Bootstrap -->
     {{ bootstrap.load_js() }}
 {% endblock %}
-</body>
-</html>

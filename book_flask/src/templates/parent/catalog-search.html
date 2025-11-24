@@ -1,9 +1,9 @@
     <!doctype html>
     {% extends "layout.html" %}
     {% block content %}
-        <div class="container" style="height: 100%">
+        <div class="container" >
             <!-- Search/ISBN bar -->
-            <div class="row justify-content-start input-group mt-2">
+            <div class="row justify-content-start input-group">
                 <div class="col-4">
                     <input type="search" id="search-box" name="q" class="form-control" placeholder="Search...">
                 </div>
@@ -17,7 +17,7 @@
             </div>
             <!-- Search Results -->
             <div class="container bg-light overflow-y-auto mt-2"
-                 style="height: 86vh" id="results">
+                 style="min-height: 80vh;max-height: 80vh" id="results">
                 {% include 'layout/book-grid.html' %}
             </div>
 

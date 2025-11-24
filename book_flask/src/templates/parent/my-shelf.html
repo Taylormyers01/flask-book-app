@@ -63,9 +63,9 @@
 {% endblock %}
 
 {% block content %}
-    <div id="board" class="container-lg" style="min-height: 600px; position: relative; background:lightgrey; padding: 0">
-        <div class="row" style="background: lightgrey">
-            <div class="col-8 overflow-y-auto scrollhidden m-0 mt-1" style="z-index: 1; max-height: 90vh">
+    <div id="board" class="container-lg m-1" style="min-height: 600px; position: relative; padding: 0">
+        <div class="row">
+            <div class="col-8 overflow-y-auto scrollhidden m-0 mt-1" style="z-index: 1; max-height: 80vh">
                     <div id="shelf" class="row shelf gap-2">
                         {% for x in range(100) %}
                             <div id="{{ x }}-drop"
