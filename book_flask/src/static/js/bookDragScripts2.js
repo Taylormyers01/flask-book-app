@@ -147,7 +147,7 @@
                 return $c;
             },
             appendTo: "body",
-            containment: "#board",
+            // containment: "#board",
             zIndex: 2000,
             revert: "invalid",
             start: function (event, ui) {

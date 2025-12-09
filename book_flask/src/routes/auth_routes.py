@@ -1,5 +1,3 @@
-from tkinter import EXCEPTION
-
 from flask import Blueprint, request, redirect, render_template, url_for, flash
 from flask_login import login_user, logout_user, login_required
 from services.auth_service import register_user, authenticate_user

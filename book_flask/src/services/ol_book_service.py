@@ -105,7 +105,7 @@ def create_ol_book(doc, details, cover_url, work_key):
     if description is None and 'links' in doc:
         description = ''
         for link in doc.get('links'):
-            description += f'{link['title']} -> {link['url']}\n\n'
+            description += f"{link['title']} -> {link['url']}\n\n"
 
     author = ", ".join(doc.get("author_name", []))
     if 'authors' in doc:

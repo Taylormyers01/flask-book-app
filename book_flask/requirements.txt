@@ -4,7 +4,9 @@ jinja2-fragments==1.10.0
 Flask-CORS==6.0.1
 Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
+gunicorn
 waitress==3.0.2
 python-dotenv==0.19.2
 requests==2.32.5
 platformdirs
+pymysql

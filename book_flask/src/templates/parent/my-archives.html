@@ -2,125 +2,106 @@
 {% extends "layout.html" %}
 {% block content %}
     <title>The Archives</title>
+    <div>
+        <ul class="nav nav-tabs" id="bookTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active"
+                        data-bs-toggle="tab"
+                        data-bs-target="#ownedBooks"
+                        type="button"
+                        role="tab">
+                    Owned
+                </button>
+            </li>
 
-    <div class="accordion" id="archivesAccordion">
-        <h2 class="accordion-header" id="readBooks-headingOne">
-            <button class="accordion-button"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#readBooks"
-                    aria-expanded="true"
-                    aria-controls="readBooks-collapseOne"
-                    >
-                Read Books
-            </button>
-        </h2>
-        <div id="readBooks"
-             class="accordion-collapse collapse"
-             aria-labelledby="readBooks-headingOne"
-             data-bs-parent="#archivesAccordion">
-            <div class="accordion-body">
-                {% with books=read_books %}
-                    {% include "layout/book-grid.html" %}
-                {% endwith %}
-            </div>
-        </div>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#readBooks"
+                        type="button"
+                        role="tab">
+                    Read
+                </button>
+            </li>
 
+            <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#wantToReadBooks"
+                        type="button"
+                        role="tab">
+                    Want To Read
+                </button>
+            </li>
 
-        <h2 class="accordion-header" id="wantToRead-headingOne">
-            <button class="accordion-button"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#wantToRead"
-                    aria-expanded="true"
-                    aria-controls="readBooks-collapseOne"
-            >
-                Want To Read Books
-            </button>
-        </h2>
-        <div id="wantToRead"
-             class="accordion-collapse collapse"
-             aria-labelledby="wantToRead-headingOne"
-             data-bs-parent="#archivesAccordion">
-            <div class="accordion-body">
-                {% with books=want_to_read %}
-                    {% include "layout/book-grid.html" %}
-                {% endwith %}
-            </div>
-        </div>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#readingBooks"
+                        type="button"
+                        role="tab">
+                    Reading
+                </button>
+            </li>
+        </ul>
 
-        <h2 class="accordion-header" id="ownedBooks-headingOne">
-            <button class="accordion-button"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#ownedBooks"
-                    aria-expanded="true"
-                    aria-controls="ownedBooks-collapseOne"
-            >
-                Owned Books
-            </button>
-        </h2>
-        <div id="ownedBooks"
-             class="accordion-collapse collapse show"
-             aria-labelledby="ownedBooks-headingOne"
-             data-bs-parent="#archivesAccordion">
-            <div class="accordion-body">
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active"
+                 id="ownedBooks"
+                 role="tabpanel">
                 {% with books=owned_books %}
                     {% include "layout/book-grid.html" %}
                 {% endwith %}
             </div>
-        </div>
 
-        <h2 class="accordion-header" id="reading-headingOne">
-            <button class="accordion-button"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#reading"
-                    aria-expanded="true"
-                    aria-controls="reading-collapseOne"
-            >
-                Reading
-            </button>
-        </h2>
-        <div id="reading"
-             class="accordion-collapse collapse"
-             aria-labelledby="reading-headingOne"
-             data-bs-parent="#archivesAccordion">
-            <div class="accordion-body">
+            <div class="tab-pane fade"
+                 id="readBooks"
+                 role="tabpanel">
+                {% with books=read_books %}
+                    {% include "layout/book-grid.html" %}
+                {% endwith %}
+            </div>
+
+            <div class="tab-pane fade"
+                 id="wantToReadBooks"
+                 role="tabpanel">
+                {% with books=want_to_read %}
+                    {% include "layout/book-grid.html" %}
+                {% endwith %}
+            </div>
+
+            <div class="tab-pane fade"
+                 id="readingBooks"
+                 role="tabpanel">
                 {% with books=reading_books %}
                     {% include "layout/book-grid.html" %}
                 {% endwith %}
             </div>
         </div>
-
     </div>
+
 
     {% include "content/book-modal.html" %}
     <script>
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const accordion = document.getElementById('archivesAccordion');
-
-            accordion.addEventListener('show.bs.collapse', function (event) {
-                // Save the open panel ID in localStorage
-                localStorage.setItem('openAccordionId', event.target.id);
-            });
-
-            accordion.addEventListener('hide.bs.collapse', function (event) {
-                // Remove when it closes
-                const currentOpen = localStorage.getItem('openAccordionId');
-                if (currentOpen === event.target.id) {
-                    localStorage.removeItem('openAccordionId');
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabTriggers = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabTriggers.forEach(function(tabTrigger) {
+                tabTrigger.addEventListener('shown.bs.tab', function(event) {
+                    console.log(event);
+                    localStorage.setItem('activeTabId', event.target.attributes.getNamedItem('data-bs-target'));
+                });
             });
         });
 
-        // Open the most recently opened accordion
-        document.addEventListener('DOMContentLoaded', function () {
-            const openAccordionId = localStorage.getItem('openAccordionId');
-            if (openAccordionId) {
-                const element = document.getElementById(openAccordionId);
-                const collapse = new bootstrap.Collapse(element, { show: true });
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTabId = localStorage.getItem('activeTabId');
+            if (activeTabId) {
+                console.log(activeTabId);
+                const someTabTriggerEl = document.getElementById(activeTabId);
+                if (someTabTriggerEl) {
+                    const tab = new bootstrap.Tab(someTabTriggerEl);
+                    tab.show();
+                }
             }
         });
 
@@ -133,7 +114,7 @@
             await sleep(1000) // allows time for backend update
             reload = bookModal.getAttribute('data-reload')
             // force reload to update content
-            if (reload ==='true'){
+            if (reload === 'true') {
                 bookModal.setAttribute('book-reload', null)
                 window.location.reload();
             }
