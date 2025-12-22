@@ -44,8 +44,8 @@ docker push taylormyers01/book_flask
 
 ** Linux-server **
 ```bash
-docker pull taylormyers01/book_falsk
+docker pull taylormyers01/book_flask
 
-docker run -d --restart unless-stopped -p 5000:5000 taylormyers01/book_flask
+docker run -d --restart unless-stopped -p 5000:5000 --platform linux/amd64 taylormyers01/book_flask
 ```
 

@@ -1,20 +1,35 @@
-<div class="card mb-3 p-0" style="max-width: 350px; max-height: 175px"
+<div class="card mb-3 p-0 shadow-sm h-100"
      role="button"
      data-bs-toggle="modal"
      data-bs-target="#bookModal"
      data-book="{{ v_book.to_json() }}">
-    <div class="row g-0">
-        <div class="col-md-4">
-            {% if v_book.thumbnail != None %}
-                <img src="{{ v_book.thumbnail}}" class="img-fluid rounded-start" style="max-height: 170px" alt="...">
+
+    <div class="row g-0 h-100 align-items-stretch">
+        <div class="col-4 d-flex">
+            {% if v_book.thumbnail %}
+                <img
+                        src="{{ v_book.thumbnail }}"
+                        class="img-fluid rounded-start h-100 w-100 object-fit-cover"
+                        alt="{{ v_book.title }}"
+                >
             {% else %}
-                <img src="{{ url_for('static', filename='images/empty_cover.png') }}" style="max-height: 170px" class="card-img-top" alt="no-thumnail">
+                <img
+                        src="{{ url_for('static', filename='images/empty_cover.png') }}"
+                        class="img-fluid rounded-start h-100 w-100 object-fit-cover"
+                        alt="No cover"
+                >
             {% endif %}
         </div>
-        <div class="col-md-8">
-            <div class="card-body">
-                <h5 class="card-title overflow-hidden" style="max-height: 50px">{{ v_book.title }}</h5>
-                <p class="card-text text-muted overflow-y-hidden" style="max-height: 50px">By: {{ v_book.author }}</p>
+
+        <div class="col-8 col-sm-9 col-md-8">
+            <div class="card-body py-2 px-3">
+                <h6 class="card-title mb-1 text-truncate">
+                    {{ v_book.title }}
+                </h6>
+
+                <p class="card-text text-muted small mb-0 text-truncate">
+                    By {{ v_book.author }}
+                </p>
             </div>
         </div>
     </div>

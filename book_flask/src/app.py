@@ -23,7 +23,7 @@ APP_NAME = "Book-Flask"
 APP_AUTHOR = "TM"
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-ENV_PATH = os.path.join(BASE_DIR, "resources", "dev.env")
+ENV_PATH = os.path.join(BASE_DIR, "resources", "prd.env")
 
 # Load .env
 if os.path.exists(ENV_PATH):
